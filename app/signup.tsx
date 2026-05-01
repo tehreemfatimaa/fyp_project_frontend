@@ -14,8 +14,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { API } from "../app/services/api.js";
 
 const { width } = Dimensions.get("window");
+// console.log(API,"apiiiiiiiiiiiiiiiii")
 
 export default function SignUpScreen() {
   const [username, setUsername] = useState("");
@@ -23,21 +25,123 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [isPressed, setIsPressed] = useState(false);
 
-  const handleSignUp = () => {
-    if (!username || !email || !password) {
-      Alert.alert("Error", "Please fill all fields");
-      return;
+//  const handleSignUp = async () => {
+//   // ✅ Validation
+//   if (!username || !email || !password) {
+//     Alert.alert("Error", "Please fill all fields");
+//     return;
+//   }
+
+//   try {
+//     // ✅ API call
+//     const res = await API.post("/auth/signup", {
+//       username: username,
+//       email: email,
+//       password: password,
+//     });
+
+//     console.log("Signup Response:", res.data);
+
+//     // ✅ Success
+//     Alert.alert("Success", "Account created successfully 🚀", [
+//       {
+//         text: "OK",
+//         onPress: () => router.push("/login"),
+//       },
+//     ]);
+
+//   } catch (error) {
+//     console.log("Signup Error:", error);
+
+//     // ✅ Better error handling
+//     // if (error.response) {
+//     //   Alert.alert("Error", error.response.data.detail || "Signup failed");
+//     // } else if (error.request) {
+//     //   Alert.alert("Error", "Network error. Check your connection");
+//     // } else {
+//     //   Alert.alert("Error", "Something went wrong");
+//     // }
+//   }
+// };
+// const handleSignUp = async () => {
+//   // ✅ Validation
+//   if (!username || !email || !password) {
+//     Alert.alert("Error", "Please fill all fields");
+//     return;
+//   }
+
+//   try {
+//     // ✅ API CALL
+//     const res = await API.post("/auth/signup", {
+//       username: username.trim(),
+//       email: email.trim(),
+//       password: password,
+//     });
+
+//     console.log("Signup Response:", res.data);
+
+//     // ✅ Success message (no button needed)
+//     Alert.alert("Success 🚀", "Signup successful! Redirecting...");
+
+//     // ✅ Auto redirect to login screen
+//     setTimeout(() => {
+//       router.replace("/"); // 👈 login screen (agar "/" login hai)
+//     }, 1500);
+
+//   } catch (error: any) {
+//   console.log("Signup Error:", error);
+
+//   Alert.alert(
+//     "Error",
+//     error?.response?.data?.detail || "Signup failed"
+//   );
+// }
+// };
+
+const handleSignUp = async () => {
+  // ✅ Validation
+  if (!username || !email || !password) {
+    Alert.alert("Error", "Please fill all fields");
+    return;
+  }
+
+  try {
+    //  API CALL
+    const res = await API.post("/auth/signup", {
+      username: username.trim(),
+      email: email.trim(),
+      password: password,
+    });
+
+    console.log("Signup Response:", res.data);
+
+    //  SUCCESS MESSAGE (platform safe)
+    if (Platform.OS === "web") {
+      window.alert("Signup successful 🚀 Redirecting...");
+    } else {
+      Alert.alert("Success 🚀", "Signup successful! Redirecting...");
     }
 
-    Alert.alert("Success", "Account created successfully 🚀", [
-      {
-        text: "OK",
-        onPress: () => router.push("/inputscreen"),
-      },
-    ]);
-  };
+    // Auto redirect (safe delay)
+    setTimeout(() => {
+      router.replace("/"); //  login screen (index)
+    }, 1200);
 
-  return (
+  } catch (error: any) {
+    console.log("Signup Error:", error);
+
+    const message =
+      error?.response?.data?.detail || "Signup failed";
+
+    if (Platform.OS === "web") {
+      window.alert("Error: " + message);
+    } else {
+      Alert.alert("Error", message);
+    }
+  }
+};
+
+return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
