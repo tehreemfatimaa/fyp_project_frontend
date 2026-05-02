@@ -1,88 +1,4 @@
-// import { LinearGradient } from "expo-linear-gradient";
-// import { useRouter } from "expo-router";
-// import React, { useEffect } from "react";
-// import { Animated, StyleSheet, Text, View } from "react-native";
-
-// type Props = {
-//   filledLinesCount: number;
-// };
-
-// export default function DataAnalyzingScreen({ filledLinesCount }: Props) {
-//   const router = useRouter();
-//   const animation = new Animated.Value(0);
-
-//   // Animate bars
-//   useEffect(() => {
-//     Animated.loop(
-//       Animated.sequence([
-//         Animated.timing(animation, {
-//           toValue: 1,
-//           duration: 700,
-//           useNativeDriver: true,
-//         }),
-//         Animated.timing(animation, {
-//           toValue: 0,
-//           duration: 700,
-//           useNativeDriver: true,
-//         }),
-//       ]),
-//     ).start();
-//   }, []);
-
-//   // ✅ Leave screen ONLY when 5 lines are filled
-//   useEffect(() => {
-//     if (filledLinesCount >= 5) {
-//       router.replace("/next-screen"); // change route if needed
-//     }
-//   }, [filledLinesCount]);
-
-//   return (
-//     <LinearGradient colors={["#C8F7C5", "#2ECC40"]} style={styles.container}>
-//       <Text style={styles.text}>...Analyzing your data</Text>
-
-//       <View style={styles.barContainer}>
-//         {[0, 1, 2, 3, 4].map((i) => (
-//           <Animated.View
-//             key={i}
-//             style={[
-//               styles.bar,
-//               {
-//                 opacity: animation.interpolate({
-//                   inputRange: [0, 1],
-//                   outputRange: [0.3 + i * 0.1, 1],
-//                 }),
-//               },
-//             ]}
-//           />
-//         ))}
-//       </View>
-//     </LinearGradient>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   text: {
-//     fontSize: 14,
-//     color: "#000",
-//     marginBottom: 10,
-//   },
-//   barContainer: {
-//     flexDirection: "row",
-//     gap: 4,
-//   },
-//   bar: {
-//     width: 6,
-//     height: 10,
-//     backgroundColor: "#000",
-//     borderRadius: 2,
-//   },
-// });
-
+//done
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef } from "react";
 import {
@@ -138,7 +54,7 @@ export default function DataAnalyzingScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace("/estimatesolar-generation"); // removes this screen from stack
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer); // cleanup
   }, []);

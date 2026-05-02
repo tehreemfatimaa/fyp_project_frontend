@@ -1,8 +1,10 @@
-import { Picker } from "@react-native-picker/picker";
+//done
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Switch,
@@ -13,603 +15,432 @@ import {
 
 export default function SystemDetailsScreen() {
   const [solarSize, setSolarSize] = useState("");
-
   const [panelArea, setPanelArea] = useState("");
   const [powerOutput, setPowerOutput] = useState("");
-
   const [hasBattery, setHasBattery] = useState(false);
   const [batteryCapacity, setBatteryCapacity] = useState("");
   const [unit, setUnit] = useState("sq. m");
-  const [unitSelected, setUnitSelected] = useState(false);
-  const [powerUnitSelected, setPowerUnitSelected] = useState(false);
+  const [panelType, setPanelType] = useState("Monocrystalline");
+  const [inverterType, setInverterType] = useState("on-grid");
+  const [powerUnit, setPowerUnit] = useState("W");
+  const [panelQuantity, setPanelQuantity] = useState(0);
+
+  // Selection states for gray/dark text logic
+  const [isPanelSelected, setIsPanelSelected] = useState(false);
+  const [isInverterSelected, setIsInverterSelected] = useState(false);
+
+  // Modal visibility
   const [unitModalVisible, setUnitModalVisible] = useState(false);
   const [panelModalVisible, setPanelModalVisible] = useState(false);
   const [inverterModalVisible, setInverterModalVisible] = useState(false);
-  const [panelType, setPanelType] = useState("Monocrystalline");
-  const [inverterType, setInverterType] = useState("On-grid");
-  const [panelTouched, setPanelTouched] = useState(false);
-  const [inverterTouched, setInverterTouched] = useState(false);
-  // const displayPanelArea = panelArea ? `${panelArea} ${unit}` : "";
-  const rightDisplay = panelArea.length > 0 ? `${unit}` : "sq. m";
-  const [powerUnit, setPowerUnit] = useState("W");
-  const router = useRouter();
   const [powerUnitModalVisible, setPowerUnitModalVisible] = useState(false);
-  // ✅ PANEL QUANTITY STATE (ADD HERE)
-  const [panelQuantity, setPanelQuantity] = useState(0);
 
-  // ✅ HANDLERS (ADD HERE)
+  const router = useRouter();
+
   const increasePanel = () => setPanelQuantity((prev) => prev + 1);
   const decreasePanel = () =>
     setPanelQuantity((prev) => (prev > 0 ? prev - 1 : 0));
 
-  const rightValueDisplay =
-    panelArea.length > 0 ? `${panelArea} ${unit}` : unit;
-
-  const panelAreaDisplay =
-    panelArea.length === 0
-      ? ""
-      : unitSelected
-        ? `${panelArea} ${unit}`
-        : panelArea;
-
-  const powerOutputDisplay =
-    powerOutput.length === 0
-      ? ""
-      : powerUnitSelected
-        ? `${powerOutput} ${powerUnit}`
-        : powerOutput;
-
-  // ✅ numbers only helper
-  const onlyNumbers = (text: string) => text.replace(/[^0-9]/g, "");
-
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Please enter your System details</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.screen}
+    >
+      <View style={styles.cardWrapper}>
+        <View style={styles.mainCard}>
+          <Text style={styles.title}>
+            Please enter your System{"\n"}details
+          </Text>
+          <View style={styles.separator} />
 
-        <View style={styles.card}>
-          {/* Solar Size */}
-          <Text style={styles.label}>Solar System size (kW)</Text>
-          <TextInput
-            value={solarSize}
-            onChangeText={(t) => setSolarSize(onlyNumbers(t))}
-            keyboardType="numeric"
-            placeholder="e.g. 35kw"
-            placeholderTextColor="#B0B0B0"
-            //changing by me Solar System size
-            style={[styles.input, { width: "75%" }]}
-          />
+          {/* 1. Solar System Size */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Solar System size(kW)</Text>
+            <TextInput
+              value={solarSize}
+              onChangeText={setSolarSize}
+              keyboardType="numeric"
+              placeholder="eg.3kW"
+              placeholderTextColor="#999"
+              style={[styles.fullInput, solarSize ? styles.darkText : null]}
+            />
+          </View>
 
-          {/* Panel Type */}
-          <Text style={styles.label}>Panel type</Text>
-          {/* changing by me Panel type */}
-          <View style={[styles.pickerWrapper, { width: "75%" }]}>
-            <View pointerEvents="none">
-              {/*  */}
-              <Picker
-                selectedValue={panelType}
-                onValueChange={() => {}}
-                style={[
-                  styles.picker,
-                  { color: panelTouched ? "#111" : "#B0B0B0" },
-                ]}
-              >
-                <Picker.Item label="Monocrystalline" value="" />
-                <Picker.Item label="Monocrystalline" value="Monocrystalline" />
-                <Picker.Item label="Polycrystalline" value="Polycrystalline" />
-              </Picker>
-            </View>
+          {/* 2. Panel Type */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Panel type</Text>
             <Pressable
-              style={styles.arrowClickArea}
+              style={styles.dropdownInput}
               onPress={() => setPanelModalVisible(true)}
-            />
-          </View>
-
-          {/* Area */}
-
-          <Text style={styles.label}>Area of one panel</Text>
-
-          <View style={styles.row}>
-            <TextInput
-              value={panelAreaDisplay}
-              onChangeText={(text) => {
-                // extract only number part (ignore unit if user somehow types it)
-                const numeric = text.replace(/[^0-9]/g, "");
-                setPanelArea(numeric);
-              }}
-              keyboardType="numeric"
-              placeholder="e.g. 18 "
-              placeholderTextColor="#B0B0B0"
-              //changing by me Area of one panel
-              // style={[styles.input, styles.flexInput]}
-
-              style={[styles.input, { width: "62%" }]}
-            />
-            {/* ✅ PANEL QUANTITY CONTROL (ADD HERE) */}
-            {/* changing by me counter  */}
-            <View style={[styles.counterContainer, { width: 80 }]}>
-              <Pressable style={styles.counterBtn} onPress={decreasePanel}>
-                <Text style={styles.counterText}>−</Text>
-              </Pressable>
-
-              <Text style={styles.counterValue}>{panelQuantity}</Text>
-
-              <Pressable style={styles.counterBtn} onPress={increasePanel}>
-                <Text style={styles.counterText}>+</Text>
-              </Pressable>
-            </View>
-            <View style={styles.unitButton}>
-              <Text style={styles.unitText}>{unit}</Text>
-
-              <Pressable onPress={() => setUnitModalVisible(true)} hitSlop={10}>
-                <Text style={styles.unitArrow}> ▼</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Power Output */}
-          <Text style={styles.label}>Power output per panel</Text>
-          {/* changing by me  Power Output */}
-          <View style={[styles.row, { width: "75%" }]}>
-            <TextInput
-              value={powerOutputDisplay}
-              onChangeText={(t) => setPowerOutput(onlyNumbers(t))}
-              keyboardType="numeric"
-              placeholder="e.g. 100"
-              placeholderTextColor="#B0B0B0"
-              style={[styles.input, styles.flexInput]}
-            />
-
-            <View style={styles.unitButton}>
-              <Text style={styles.unitText}>{powerUnit}</Text>
-
-              <Pressable
-                onPress={() => setPowerUnitModalVisible(true)}
-                hitSlop={10}
+            >
+              <Text
+                style={
+                  isPanelSelected ? styles.darkText : styles.placeholderText
+                }
               >
-                <Text style={styles.unitArrow}> ▼</Text>
-              </Pressable>
-            </View>
+                {panelType}
+              </Text>
+              <Text style={styles.arrowIcon}>▼</Text>
+            </Pressable>
           </View>
-          {/* Inverter Type */}
-          <Text style={styles.label}>Inverter type</Text>
-          {/* changing by me Inverter type */}
-          <View style={[styles.pickerWrapper, { width: "75%" }]}>
-            <View pointerEvents="none">
-              <Picker
-                selectedValue={inverterType}
-                onValueChange={() => {}}
+
+          {/* 3. Area of one panel */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Area of one panel</Text>
+            <View style={styles.row}>
+              <TextInput
+                value={panelArea}
+                onChangeText={setPanelArea}
+                keyboardType="numeric"
+                placeholder="eg.18"
+                placeholderTextColor="#999"
                 style={[
-                  styles.picker,
-                  { color: inverterTouched ? "#111" : "#B0B0B0" },
+                  styles.fullInput,
+                  { flex: 2.5 },
+                  panelArea ? styles.darkText : null,
                 ]}
+              />
+              <View style={styles.counterBox}>
+                <Pressable onPress={decreasePanel} style={styles.counterBtn}>
+                  <Text style={styles.counterIcon}>-</Text>
+                </Pressable>
+                <Text style={styles.counterVal}>{panelQuantity}</Text>
+                <Pressable onPress={increasePanel} style={styles.counterBtn}>
+                  <Text style={styles.counterIcon}>+</Text>
+                </Pressable>
+              </View>
+              <Pressable
+                style={styles.unitTagSmall}
+                onPress={() => setUnitModalVisible(true)}
               >
-                <Picker.Item label="On-grid" value="" />
-                <Picker.Item label="On-grid" value="On-grid" />
-                <Picker.Item label="Hybrid" value="Hybrid" />
-                <Picker.Item label="Off-grid" value="Off-grid" />
-              </Picker>
+                <Text style={styles.unitTagText}>{unit}</Text>
+                <Text style={styles.unitTagArrow}>▼</Text>
+              </Pressable>
             </View>
+          </View>
+
+          {/* 4. Power output per panel */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Power output per panel</Text>
+            <View style={styles.row}>
+              <TextInput
+                value={powerOutput}
+                onChangeText={setPowerOutput}
+                keyboardType="numeric"
+                placeholder="eg.100"
+                placeholderTextColor="#999"
+                style={[
+                  styles.fullInput,
+                  { flex: 1, marginRight: 10 },
+                  powerOutput ? styles.darkText : null,
+                ]}
+              />
+              <Pressable
+                style={styles.unitTagSmall}
+                onPress={() => setPowerUnitModalVisible(true)}
+              >
+                <Text style={styles.unitTagText}>{powerUnit}</Text>
+                <Text style={styles.unitTagArrow}>▼</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* 5. Inverter type */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Inverter type</Text>
             <Pressable
-              style={styles.arrowClickArea}
+              style={styles.dropdownInput}
               onPress={() => setInverterModalVisible(true)}
+            >
+              <Text
+                style={
+                  isInverterSelected ? styles.darkText : styles.placeholderText
+                }
+              >
+                {inverterType}
+              </Text>
+              <Text style={styles.arrowIcon}>▼</Text>
+            </Pressable>
+          </View>
+
+          {/* 6. Battery Question */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Do you have battery?</Text>
+            <Switch
+              value={hasBattery}
+              onValueChange={setHasBattery}
+              trackColor={{ false: "#999", true: "#28a745" }}
+              thumbColor={"#fff"}
+              style={styles.switchStyle}
             />
           </View>
 
-          {/* Battery */}
-          {/* switch button */}
-          {/* <View style={[styles.switchRow, { width: "20%" }]}> */}
-          <Text style={styles.label}>Do you have battery?</Text>
-          {/* switch button shift */}
-          <View style={[styles.switchRow, { width: "20%" }]}>
-            <Switch value={hasBattery} onValueChange={setHasBattery} />
-          </View>
-
+          {/* 7. Battery Capacity */}
           {hasBattery && (
-            <>
-              <Text style={styles.label}>Battery capacity (kWh)</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Battery capacity(kWh)</Text>
               <TextInput
                 value={batteryCapacity}
-                onChangeText={(t) => setBatteryCapacity(onlyNumbers(t))}
+                onChangeText={setBatteryCapacity}
                 keyboardType="numeric"
                 placeholder="100"
-                placeholderTextColor="#B0B0B0"
-                //changing by me
-                style={[styles.input, { width: "75%" }]}
+                placeholderTextColor="#999"
+                style={[
+                  styles.fullInput,
+                  { width: "45%" },
+                  batteryCapacity ? styles.darkText : null,
+                ]}
               />
-            </>
+            </View>
           )}
-        </View>
 
-        {/* Progress */}
-
-        <View style={styles.progressBg}>
-          <View style={styles.progressFill} />
-        </View>
-
-        <View style={styles.nextButtonContainer}>
-          {/* <Pressable style={styles.nextButton}> */}
           <Pressable
             style={styles.nextButton}
             onPress={() => router.push("/appliance-usage-pattern")}
           >
             <Text style={styles.nextText}>Next</Text>
           </Pressable>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.push("/welcome")}
+          >
+            <Text style={styles.backText}>Back</Text>
+          </Pressable>
+
+          <View style={styles.progressContainer}>
+            <View style={styles.progressTrack}>
+              <View style={styles.progressFill} />
+            </View>
+          </View>
         </View>
       </View>
 
-      {/* Panel Modal */}
-      <Modal transparent animationType="fade" visible={panelModalVisible}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setPanelModalVisible(false)}
-        >
-          <View style={styles.modalCard}>
-            {["Monocrystalline", "Polycrystalline"].map((item) => (
-              <Pressable
-                key={item}
-                style={styles.modalRow}
-                onPress={() => {
-                  setPanelType(item);
-                  setPanelTouched(true); // 👈 ADD THIS
-                  setPanelModalVisible(false);
-                }}
-              >
-                <Text style={styles.modalText}>{item}</Text>
-                <View
-                  style={[
-                    styles.radioOuter,
-                    panelType === item && styles.radioOuterActive,
-                  ]}
-                >
-                  {panelType === item && <View style={styles.radioInner} />}
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-
-      {/* Inverter Modal */}
-      <Modal transparent animationType="fade" visible={inverterModalVisible}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setInverterModalVisible(false)}
-        >
-          <View style={styles.modalCard}>
-            {["On-grid", "Hybrid", "Off-grid"].map((item) => (
-              <Pressable
-                key={item}
-                style={styles.modalRow}
-                onPress={() => {
-                  setInverterType(item);
-                  setInverterTouched(true); // 👈 ADD THIS
-                  setInverterModalVisible(false);
-                }}
-              >
-                <Text style={styles.modalText}>{item}</Text>
-                <View
-                  style={[
-                    styles.radioOuter,
-                    inverterType === item && styles.radioOuterActive,
-                  ]}
-                >
-                  {inverterType === item && <View style={styles.radioInner} />}
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-
-      {/* Unit Modal */}
-      <Modal transparent animationType="fade" visible={unitModalVisible}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setUnitModalVisible(false)}
-        >
-          <View style={styles.modalCard}>
-            {["sq. m", "sq. ft", "sq. yd"].map((item) => (
-              <Pressable
-                key={item}
-                style={styles.modalRow}
-                onPress={() => {
-                  setUnit(item);
-                  setUnitSelected(true); // 👈 ADD THIS
-                  setUnitModalVisible(false);
-                }}
-              >
-                <Text style={styles.modalText}>{item}</Text>
-                <View
-                  style={[
-                    styles.radioOuter,
-                    unit === item && styles.radioOuterActive,
-                  ]}
-                >
-                  {unit === item && <View style={styles.radioInner} />}
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-      {/* Power Unit Modal */}
-      <Modal transparent animationType="fade" visible={powerUnitModalVisible}>
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setPowerUnitModalVisible(false)}
-        >
-          <View style={styles.modalCard}>
-            {["W", "kW"].map((item) => (
-              <Pressable
-                key={item}
-                style={styles.modalRow}
-                onPress={() => {
-                  setPowerUnit(item);
-                  setPowerUnitSelected(true); // 👈 ADD THIS
-                  setPowerUnitModalVisible(false);
-                }}
-              >
-                <Text style={styles.modalText}>{item}</Text>
-
-                <View
-                  style={[
-                    styles.radioOuter,
-                    powerUnit === item && styles.radioOuterActive,
-                  ]}
-                >
-                  {powerUnit === item && <View style={styles.radioInner} />}
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
-    </View>
+      {/* Modals with custom Radio UI */}
+      <SelectionModal
+        visible={panelModalVisible}
+        setVisible={setPanelModalVisible}
+        options={["Monocrystalline", "Polycrystalline"]}
+        selected={panelType}
+        onSelect={(val: string) => {
+          setPanelType(val);
+          setIsPanelSelected(true);
+        }}
+      />
+      <SelectionModal
+        visible={inverterModalVisible}
+        setVisible={setInverterModalVisible}
+        options={["on-grid", "hybrid", "off-grid"]}
+        selected={inverterType}
+        onSelect={(val: string) => {
+          setInverterType(val);
+          setIsInverterSelected(true);
+        }}
+      />
+      <SelectionModal
+        visible={unitModalVisible}
+        setVisible={setUnitModalVisible}
+        options={["sq. m", "sq. ft"]}
+        selected={unit}
+        onSelect={setUnit}
+      />
+      <SelectionModal
+        visible={powerUnitModalVisible}
+        setVisible={setPowerUnitModalVisible}
+        options={["W", "kW"]}
+        selected={powerUnit}
+        onSelect={setPowerUnit}
+      />
+    </KeyboardAvoidingView>
   );
 }
 
-/* styles unchanged */
+function SelectionModal({
+  visible,
+  setVisible,
+  options,
+  selected,
+  onSelect,
+}: any) {
+  return (
+    <Modal transparent animationType="fade" visible={visible}>
+      <Pressable style={styles.modalOverlay} onPress={() => setVisible(false)}>
+        <View style={styles.modalCard}>
+          {options.map((o: string, index: number) => (
+            <Pressable
+              key={o}
+              style={[
+                styles.modalRow,
+                index === options.length - 1 && { borderBottomWidth: 0 },
+              ]}
+              onPress={() => {
+                onSelect(o);
+                setVisible(false);
+              }}
+            >
+              <Text style={styles.modalText}>{o}</Text>
+              <View style={styles.radioOuter}>
+                {selected === o && <View style={styles.radioInner} />}
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      </Pressable>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
-  screen: {
+  screen: { flex: 1, backgroundColor: "#FFF" },
+  cardWrapper: {
     flex: 1,
-    backgroundColor: "#f4f5f7",
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 30,
   },
-
-  content: {
-    flex: 1,
-
-    padding: 14,
-
-    justifyContent: "flex-start",
+  mainCard: {
+    backgroundColor: "#F2F2F2",
+    borderRadius: 35,
+    padding: 22,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
-
   title: {
     fontSize: 22,
-    // fontWeight: "600",
-    fontWeight: "600",
-    marginBottom: 10,
-
-    color: "#111",
+    fontWeight: "800",
+    color: "#000",
+    marginBottom: 12,
+    lineHeight: 26,
   },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-
-    padding: 12,
-  },
-
-  label: {
-    marginTop: 6,
-
-    marginBottom: 3,
-
-    color: "#333",
-    fontSize: 14,
-  },
-
-  input: {
-    height: 34,
-
-    backgroundColor: "#f9f9f9",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
-    fontSize: 14,
-    color: "#111",
-  },
-
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-
-  flexInput: {
-    flex: 1,
-    // flex: 0.6,
-  },
-  unitButton: {
-    height: 34,
-    width: 85,
-    // width: 70,
-    paddingHorizontal: 14,
-    backgroundColor: "#000",
-    borderRadius: 10,
-    // justifyContent: "center",
-    // alignItems: "center",
-
-    flexDirection: "row", // ✅ ADD THIS
-    alignItems: "center", // ✅ ADD THIS
-    justifyContent: "center", // ✅ ADD THI
-  },
-  unitText: {
-    color: "#fff",
-    fontSize: 12,
-  },
-
-  //   /* ✅ Picker fixed */
-  pickerWrapper: {
-    height: 34,
-
-    backgroundColor: "#f9f9f9",
+  separator: { height: 1, backgroundColor: "#CCC", marginBottom: 12 },
+  inputGroup: { marginBottom: 12 },
+  label: { fontSize: 16, fontWeight: "700", color: "#000", marginBottom: 5 },
+  fullInput: {
+    backgroundColor: "#D9D9D9",
+    height: 38,
     borderRadius: 8,
-
-    borderWidth: 1,
-    borderColor: "#eee",
-    overflow: "hidden",
-    justifyContent: "center",
-  },
-
-  picker: {
-    height: 34,
-
-    // fontSize: 13,
+    paddingHorizontal: 12,
     fontSize: 14,
-    color: "#B0B0B0",
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    paddingLeft: 10,
   },
-
-  switchRow: {
-    marginTop: 10,
-
+  dropdownInput: {
+    backgroundColor: "#D9D9D9",
+    height: 38,
+    borderRadius: 8,
+    paddingHorizontal: 12,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
   },
-
-  progressBg: {
-    height: 5,
-    // height: 6,
-    backgroundColor: "#e0e0e0",
-    borderRadius: 10,
-    marginTop: 12,
-
-    overflow: "hidden",
+  placeholderText: { color: "#999", fontWeight: "600" },
+  darkText: { color: "#000", fontWeight: "700" },
+  arrowIcon: { fontSize: 16, color: "#000" },
+  row: { flexDirection: "row", alignItems: "center" },
+  unitTagSmall: {
+    backgroundColor: "#000",
+    height: 38,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 70,
   },
-
-  progressFill: {
-    width: "30%",
-    height: "100%",
-    backgroundColor: "#22c55e",
+  unitTagText: { color: "#FFF", fontSize: 12, fontWeight: "600" },
+  unitTagArrow: { color: "#FFF", fontSize: 14, marginLeft: 3 },
+  counterBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E0E0E0",
+    borderRadius: 5,
+    height: 30,
+    paddingHorizontal: 4,
+    marginHorizontal: 6,
+    borderWidth: 0.5,
+    borderColor: "#BBB",
   },
-
-  nextButtonContainer: {
-    alignItems: "flex-end",
-    marginTop: 10,
+  counterBtn: { paddingHorizontal: 6 },
+  counterIcon: { fontSize: 16, color: "#444" },
+  counterVal: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+    minWidth: 14,
+    textAlign: "center",
   },
-
+  switchStyle: {
+    alignSelf: "flex-start",
+    transform: [{ scale: 0.95 }],
+    marginLeft: -4,
+  },
   nextButton: {
     backgroundColor: "#000",
-    paddingHorizontal: 22,
-
     paddingVertical: 10,
-
-    borderRadius: 30,
+    paddingHorizontal: 35,
+    borderRadius: 22,
+    alignSelf: "flex-end",
+    marginTop: 5,
+  },
+  backButton: {
+    backgroundColor: "#000",
+    paddingVertical: 10,
+    paddingHorizontal: 35,
+    borderRadius: 22,
+    marginTop: -42,
+    alignSelf: "flex-start",
+    // marginBottom: 40,
+    // marginTop: 10,
   },
 
-  nextText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 12,
-  },
-  pickerText: {
-    fontSize: 13,
-    color: "#111",
-    paddingLeft: 10,
-  },
+  nextText: { color: "#FFF", fontWeight: "bold", fontSize: 15 },
+  backText: { color: "#FFF", fontWeight: "bold", fontSize: 15 },
 
+  progressContainer: { marginTop: 20, alignItems: "center" },
+  progressTrack: {
+    width: 45,
+    height: 7,
+    backgroundColor: "#000",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  progressFill: { width: "60%", height: "100%", backgroundColor: "#34C759" },
+
+  // Modal & Radio Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
-
   modalCard: {
     width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    paddingVertical: 8,
+    backgroundColor: "#FFF",
+    borderRadius: 15,
+    paddingVertical: 10,
+    overflow: "hidden",
   },
-
   modalRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEE",
   },
-
-  modalText: {
-    fontSize: 14,
-    color: "#111",
-    fontWeight: "500",
-  },
-
+  modalText: { fontSize: 18, fontWeight: "600", color: "#000" },
   radioOuter: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: "#aaa",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  radioOuterActive: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: "#000",
-  },
-
-  radioInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#000",
-  },
-  //new added for arrow only
-  arrowClickArea: {
-    position: "absolute",
-    right: 0,
-    height: "100%",
-    width: 40, // only arrow area
-  },
-  unitArrow: {
-    color: "#fff",
-    fontSize: 10,
-    marginLeft: 6,
-  },
-  // ✅ PANEL COUNTER STYLES (ADD HERE)
-  counterContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f1f1f1",
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    height: 34,
-    width: 80,
-  },
-
-  counterBtn: {
-    paddingHorizontal: 8,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  counterText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111",
-  },
-
-  counterValue: {
-    marginHorizontal: 6,
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#111",
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#000", // Yeh beech wala dot hai jo selected hone par dikhega
   },
 });
