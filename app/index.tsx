@@ -1,15 +1,62 @@
 import { router } from "expo-router";
+import React, { useState } from "react";
 import {
+  Alert,
   Image,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { API } from "../app/services/api.js";
 
 export default function HomeScreen() {
-  console.log("✅ INDEX SCREEN RENDERED");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // 🔥 LOGIN FUNCTION
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    try {
+      const res = await API.post("/auth/login", {
+        email: email.trim(),
+        password: password,
+      });
+
+      console.log("Login Response:", res.data);
+
+      // ✅ Success Message
+      if (Platform.OS === "web") {
+        window.alert("Login successful 🚀");
+      } else {
+        Alert.alert("Success", "Login successful 🚀");
+      }
+
+      // ✅ Redirect to next screen
+      setTimeout(() => {
+        router.replace("/welcome"); // 👈 next screen
+      }, 1000);
+
+    } catch (error: any) {
+      console.log("Login Error:", error);
+
+      const message =
+        error?.response?.data?.detail || "Login failed";
+
+      if (Platform.OS === "web") {
+        window.alert("Error: " + message);
+      } else {
+        Alert.alert("Error", message);
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* ================= HEADER ================= */}
@@ -36,6 +83,8 @@ export default function HomeScreen() {
           placeholder="Enter Email"
           placeholderTextColor="#999"
           style={styles.input}
+          value={email}
+          onChangeText={setEmail}
         />
 
         <Text style={styles.label}>Password</Text>
@@ -44,6 +93,8 @@ export default function HomeScreen() {
           placeholderTextColor="#999"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}
         />
 
         <Text style={styles.signup}>
@@ -58,7 +109,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/welcome")}
+          onPress={handleLogin} // 🔥 yahan change
         >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
