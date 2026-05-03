@@ -1,302 +1,8 @@
-// import { router } from "expo-router";
-// import React, { useState } from "react";
-// import {
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
-
-// export default function InputScreen() {
-//   console.log(" INPUTSCREEN RENDERED");
-//   // ✅ STATES
-//   const [location] = useState("Karachi"); // fixed, user cannot edit
-//   const [consumption, setConsumption] = useState("");
-//   const [solarHours, setSolarHours] = useState("");
-//   const [billOffset, setBillOffset] = useState("");
-//   const [envFactor, setEnvFactor] = useState("");
-//   const [isEditingConsumption, setIsEditingConsumption] = useState(false); //new for unit popup
-//   const [unit, setUnit] = useState("kWh/yr");
-
-//   // ✅ INTEGER ONLY (0–9)
-//   const handleIntegerInput = (
-//     text: string,
-//     setter: (value: string) => void,
-//   ) => {
-//     const cleaned = text.replace(/[^0-9]/g, "");
-//     setter(cleaned);
-//   };
-
-//   // ✅ DECIMAL ALLOWED (e.g. 25, 25.5)
-//   const handleDecimalInput = (
-//     text: string,
-//     setter: (value: string) => void,
-//   ) => {
-//     let cleaned = text.replace(/[^0-9.]/g, "");
-
-//     // ❗ prevent multiple dots
-//     const parts = cleaned.split(".");
-//     if (parts.length > 2) {
-//       cleaned = parts[0] + "." + parts.slice(1).join("");
-//     }
-
-//     // ❗ prevent only "."
-//     if (cleaned === ".") cleaned = "";
-
-//     setter(cleaned);
-//   };
-
-//   const handleNext = () => {
-//     console.log({
-//       consumption,
-//       location,
-//       solarHours,
-//       billOffset,
-//       envFactor,
-//       unit,
-//     });
-//   };
-
-//   return (
-//     <ScrollView style={styles.screen} contentContainerStyle={{ padding: 20 }}>
-//       <View style={styles.card}>
-//         <Text style={styles.header}>
-//           Please fill out the following information
-//         </Text>
-
-//         {/* Electricity Consumption */}
-//         <View style={styles.inputGroup}>
-//           <Text style={styles.label}>Electricity consumption</Text>
-
-//           <View style={styles.row}>
-//             {/* <TextInput
-//               // style={[styles.input, { width: "20%" }]}
-//               style={[styles.input, { flex: 2 }]}
-//               keyboardType="number-pad"
-//               value={consumption}
-//               onChangeText={(t) => handleIntegerInput(t, setConsumption)}
-//               placeholder="Enter value"
-//             /> */}
-//             {/* nnn */}
-//             <TextInput
-//               style={[styles.input, { flex: 2 }]}
-//               keyboardType="number-pad"
-//               placeholder="e.g 900"
-//               value={
-//                 isEditingConsumption
-//                   ? consumption
-//                   : consumption
-//                     ? `${consumption} ${unit}`
-//                     : ""
-//               }
-//               onFocus={() => setIsEditingConsumption(true)}
-//               onBlur={() => setIsEditingConsumption(false)}
-//               onChangeText={(text) =>
-//                 setConsumption(text.replace(/[^0-9]/g, ""))
-//               }
-//             />
-//             {/* nnn */}
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() =>
-//                 setUnit(unit === "kWh/yr" ? "kWh/month" : "kWh/yr")
-//               }
-//             >
-//               <Text style={styles.unitText}>{unit}▼</Text>
-//             </TouchableOpacity>
-//           </View>
-
-//           {consumption !== "" && (
-//             <Text style={{ marginTop: 6, color: "#555", fontSize: 12 }}>
-//               {consumption} {unit}
-//             </Text>
-//           )}
-//         </View>
-//         {/* <Text style={styles.label}>Electricity consumption</Text>
-//                 <View style={styles.row}>
-//                   <TextInput
-//                     style={styles.input}
-//                     placeholder="eg. 40"
-//                     placeholderTextColor="#9CA3AF"
-//                     keyboardType="numeric"
-//                     value={
-//                       isEditingRoof
-//                         ? roofAreaValue
-//                         : roofAreaValue
-//                           ? `${roofAreaValue} ${roofUnit}`
-//                           : ""
-//                     }
-//                     onFocus={() => setIsEditingRoof(true)}
-//                     onBlur={() => setIsEditingRoof(false)}
-//                     onChangeText={(text) =>
-//                       setRoofAreaValue(text.replace(/[^0-9.]/g, ""))
-//                     }
-//                   />
-
-//                   <TouchableOpacity
-//                     style={styles.unitBox}
-//                     onPress={() => {
-//                       setUnitTarget("roof");
-//                       setUnitModalVisible(true);
-//                     }}
-//                   >
-//                     <Text style={styles.unitText}>{roofUnit} ▼</Text>
-//                   </TouchableOpacity>
-//                 </View> */}
-
-//         {/* Location */}
-//         <View style={styles.inputGroup}>
-//           <Text style={styles.label}>Your location</Text>
-
-//           <View
-//             style={[styles.input, { width: "55%", justifyContent: "center" }]}
-//           >
-//             <Text style={{ color: "#777", fontSize: 14 }}>Karachi</Text>
-//           </View>
-//         </View>
-
-//         {/* Solar Hours */}
-//         <View style={styles.inputGroup}>
-//           <Text style={styles.label}>Solar hours per day</Text>
-//           <TextInput
-//             style={styles.input}
-//             keyboardType="number-pad"
-//             onChangeText={(t) => handleIntegerInput(t, setSolarHours)}
-//             placeholder="hrs/day"
-//           />
-//         </View>
-
-//         {/* Bill Offset */}
-//         <View style={styles.inputGroup}>
-//           <Text style={styles.label}>Bill offset percentage</Text>
-//           <TextInput
-//             style={styles.input}
-//             keyboardType="decimal-pad"
-//             onChangeText={(t) => handleDecimalInput(t, setBillOffset)}
-//             placeholder="%"
-//           />
-//         </View>
-
-//         {/* Environmental Factor */}
-//         <View style={styles.inputGroup}>
-//           <Text style={styles.label}>Environmental factor</Text>
-//           <TextInput
-//             style={styles.input}
-//             keyboardType="decimal-pad"
-//             onChangeText={(t) => handleDecimalInput(t, setEnvFactor)}
-//             placeholder="%"
-//           />
-//         </View>
-//         {/*
-//         <TouchableOpacity
-//           style={styles.button}
-//           onPress={() => router.push("/welcome")}
-//         >
-//           <Text style={styles.buttonText}>Login</Text>
-//         </TouchableOpacity> */}
-//         <View style={styles.buttonWrapper}>
-//           {/* <TouchableOpacity style={styles.button} onPress={handleNext}> */}
-//           <TouchableOpacity
-//             style={styles.button}
-//             onPress={() => router.push("/roofinfo")}
-//           >
-//             <Text style={styles.buttonText}>Next</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-//     </ScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   screen: {
-//     backgroundColor: "#F2F2F2",
-//   },
-//   card: {
-//     backgroundColor: "#F7F7F7",
-//     borderRadius: 22,
-//     padding: 20,
-//   },
-//   header: {
-//     fontSize: 30,
-//     fontWeight: "800",
-//     marginBottom: 12,
-//     color: "#111",
-//   },
-//   inputGroup: {
-//     marginBottom: 14,
-//   },
-//   label: {
-//     fontSize: 13,
-//     marginBottom: 6,
-//     color: "#333",
-//   },
-//   input: {
-//     backgroundColor: "#fff",
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 12,
-//     paddingVertical: 12,
-//     paddingHorizontal: 14,
-//     fontSize: 14,
-//   },
-//   row: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     gap: 10,
-//   },
-//   unitBox: {
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 12,
-//     paddingHorizontal: 14,
-//     height: 48,
-//     justifyContent: "center",
-//     backgroundColor: "#fff",
-//   },
-//   unitText: {
-//     fontSize: 12,
-//     fontWeight: "600",
-//   },
-
-//   button: {
-//     // backgroundColor: "#000",
-//     // paddingVertical: 10, // ⬇️ pehle 14 tha
-//     // paddingHorizontal: 24, // ⬇️ size chhota
-//     // borderRadius: 12,
-//     // alignItems: "center",
-
-//     backgroundColor: "#000",
-//     paddingVertical: 8, // ✅ chhota size
-//     paddingHorizontal: 22, // ✅ chhota size
-//     borderRadius: 12,
-//     alignItems: "center",
-
-//     alignSelf: "flex-end", // ✅ ✅ THIS IS TH
-//   },
-
-//   // buttonText: {
-//   //   color: "#fff",
-//   //   fontWeight: "600",
-//   // },
-
-//   buttonText: {
-//     color: "#fff",
-//     fontWeight: "600",
-//     fontSize: 14, // ⬇️ slightly smaller text
-//   },
-
-//   buttonWrapper: {
-//     alignItems: "flex-end", // ✅ right side
-//     marginTop: 10,
-//   },
-// });
-
+//og
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -306,32 +12,26 @@ import {
 } from "react-native";
 
 export default function InputScreen() {
-  console.log("✅ INPUTSCREEN RENDERED");
-
   const [location] = useState("Karachi");
   const [consumption, setConsumption] = useState("");
   const [solarHours, setSolarHours] = useState("");
   const [billOffset, setBillOffset] = useState("");
   const [envFactor, setEnvFactor] = useState("");
   const [unit, setUnit] = useState("kWh/yr");
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // integer only
+  const units = ["kWh/yr", "kWh/mo", "kWh/day"];
+
   const handleIntegerInput = (text: string, setter: any) => {
     const cleaned = text.replace(/[^0-9]/g, "");
     setter(cleaned);
   };
 
-  // decimal allowed
   const handleDecimalInput = (text: string, setter: any) => {
     let cleaned = text.replace(/[^0-9.]/g, "");
-
     const parts = cleaned.split(".");
-    if (parts.length > 2) {
-      cleaned = parts[0] + "." + parts.slice(1).join("");
-    }
-
+    if (parts.length > 2) cleaned = parts[0] + "." + parts.slice(1).join("");
     if (cleaned === ".") cleaned = "";
-
     setter(cleaned);
   };
 
@@ -341,177 +41,218 @@ export default function InputScreen() {
         <Text style={styles.header}>
           Please fill out the following information
         </Text>
+        <View style={styles.separator} />
 
         {/* Consumption */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Electricity consumption</Text>
-
           <View style={styles.row}>
             <TextInput
-              style={[styles.input, { flex: 2 }]}
+              style={[styles.input, { flex: 1 }]}
               keyboardType="number-pad"
-              placeholder="e.g 900"
-              value={consumption} // ✅ PURE VALUE
+              placeholder="eg.900"
+              placeholderTextColor="#999"
+              value={consumption}
               onChangeText={(t) => handleIntegerInput(t, setConsumption)}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() =>
-                setUnit(unit === "kWh/yr" ? "kWh/month" : "kWh/yr")
-              }
+              onPress={() => setModalVisible(true)}
             >
-              <Text style={styles.unitText}>{unit} ▼</Text>
+              <Text style={styles.unitText}>{unit} ∨</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Display separately */}
-          {consumption !== "" && (
-            <Text style={{ marginTop: 6, color: "#555", fontSize: 12 }}>
-              {consumption} {unit}
-            </Text>
-          )}
         </View>
 
-        {/* Location */}
+        {/* Location - Locked to Karachi */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Your location</Text>
-          <View
-            style={[styles.input, { width: "55%", justifyContent: "center" }]}
-          >
-            <Text style={{ color: "#777" }}>{location}</Text>
+          <View style={styles.disabledInput}>
+            <Text style={styles.disabledText}>{location}</Text>
           </View>
         </View>
 
         {/* Solar Hours */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Solar hours per day</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="number-pad"
-            value={solarHours}
-            onChangeText={(t) => handleIntegerInput(t, setSolarHours)}
-            placeholder="hrs/day"
-          />
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              keyboardType="decimal-pad"
+              value={solarHours}
+              onChangeText={(t) => handleDecimalInput(t, setSolarHours)}
+              placeholder="5.1"
+              placeholderTextColor="#999"
+            />
+            <Text style={styles.sideLabel}>hrs/day</Text>
+          </View>
         </View>
 
         {/* Bill Offset */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Bill offset percentage</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="decimal-pad"
-            value={billOffset}
-            onChangeText={(t) => handleDecimalInput(t, setBillOffset)}
-            placeholder="%"
-          />
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              keyboardType="decimal-pad"
+              value={billOffset}
+              onChangeText={(t) => handleDecimalInput(t, setBillOffset)}
+              placeholder="80"
+              placeholderTextColor="#999"
+            />
+            <Text style={styles.sideLabel}>%</Text>
+          </View>
         </View>
 
         {/* Env Factor */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Environmental factor</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="decimal-pad"
-            value={envFactor}
-            onChangeText={(t) => handleDecimalInput(t, setEnvFactor)}
-            placeholder="%"
-          />
+          <View style={styles.row}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              keyboardType="decimal-pad"
+              value={envFactor}
+              onChangeText={(t) => handleDecimalInput(t, setEnvFactor)}
+              placeholder="80"
+              placeholderTextColor="#999"
+            />
+            <Text style={styles.sideLabel}>%</Text>
+          </View>
         </View>
 
-        {/* Button */}
-        <View style={styles.buttonWrapper}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push("/roofinfo")}
-          >
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/roofinfo")}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={styles.progressFill} />
+          </View>
         </View>
       </View>
+
+      {/* Unit Selector Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            {units.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.modalOption}
+                onPress={() => {
+                  setUnit(item);
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalOptionText}>{item}</Text>
+                <View style={styles.radioOuter}>
+                  {unit === item && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: "#F2F2F2",
-  },
+  screen: { flex: 1, backgroundColor: "#E5E5E5" },
   card: {
-    backgroundColor: "#F7F7F7",
-    borderRadius: 22,
-    padding: 20,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 30,
+    padding: 25,
+    marginTop: 40,
+    elevation: 5,
   },
-  header: {
-    fontSize: 30,
-    fontWeight: "800",
-    marginBottom: 12,
-    color: "#111",
-  },
-  inputGroup: {
-    marginBottom: 14,
-  },
-  label: {
-    fontSize: 13,
-    marginBottom: 6,
+  header: { fontSize: 24, fontWeight: "bold", color: "#000", marginBottom: 15 },
+  separator: { height: 1, backgroundColor: "#DDD", marginBottom: 20 },
+  inputGroup: { marginBottom: 18 },
+  label: { fontSize: 16, fontWeight: "bold", color: "#000", marginBottom: 8 },
+  row: { flexDirection: "row", alignItems: "center", gap: 10 },
+  input: {
+    backgroundColor: "#DEDEDE",
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 14,
     color: "#333",
   },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    fontSize: 14,
+  disabledInput: {
+    backgroundColor: "#DEDEDE",
+    borderRadius: 10,
+    padding: 12,
+    width: "100%",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+  disabledText: { color: "#333", fontSize: 14 },
   unitBox: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 48,
-    justifyContent: "center",
-    backgroundColor: "#fff",
-  },
-  unitText: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  button: {
-    // backgroundColor: "#000",
-    // paddingVertical: 10, // ⬇️ pehle 14 tha
-    // paddingHorizontal: 24, // ⬇️ size chhota
-    // borderRadius: 12,
-    // alignItems: "center",
-
     backgroundColor: "#000",
-    paddingVertical: 8, // ✅ chhota size
-    paddingHorizontal: 22, // ✅ chhota size
-    borderRadius: 12,
-    alignItems: "center",
-
-    alignSelf: "flex-end", // ✅ ✅ THIS IS TH
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    height: 45,
+    justifyContent: "center",
   },
-
-  // buttonText: {
-  //   color: "#fff",
-  //   fontWeight: "600",
-  // },
-
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 14, // ⬇️ slightly smaller text
-  },
-
-  buttonWrapper: {
-    alignItems: "flex-end", // ✅ right side
+  unitText: { color: "#FFF", fontSize: 13, fontWeight: "600" },
+  sideLabel: { fontWeight: "bold", width: 60 },
+  button: {
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    alignSelf: "flex-end",
     marginTop: 10,
+  },
+  buttonText: { color: "#FFF", fontWeight: "bold", fontSize: 16 },
+  progressContainer: { alignItems: "center", marginTop: 30 },
+  progressBar: {
+    width: 50,
+    height: 8,
+    backgroundColor: "#000",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  progressFill: { width: "50%", height: "100%", backgroundColor: "#28a745" },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#FFF",
+    width: "80%",
+    borderRadius: 15,
+    padding: 10,
+  },
+  modalOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEE",
+  },
+  modalOptionText: { fontSize: 18, fontWeight: "600" },
+  radioOuter: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  radioInner: {
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+    backgroundColor: "#000",
   },
 });

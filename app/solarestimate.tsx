@@ -1,8 +1,10 @@
+//done
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function SolarSystemEstimate() {
+  console.log("solarestimate");
   // const navigation = useNavigation<any>();
   const router = useRouter();
 
@@ -118,117 +120,6 @@ export default function SolarSystemEstimate() {
   );
 }
 
-// const styles = StyleSheet.create({
-//   /* ================= SCREEN ================= */
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#F9FAFB", // closer to figma
-//     paddingHorizontal: 16,
-//   },
-
-//   /* ================= CONTENT ================= */
-//   content: {
-//     paddingTop: 12,
-//     gap: 14,
-//     paddingBottom: 110, // buttons space
-//   },
-
-//   /* ================= CARD ================= */
-//   card: {
-//     backgroundColor: "#ECEFF1",
-//     borderRadius: 16,
-//     paddingHorizontal: 16,
-//     paddingVertical: 14,
-//     borderWidth: 1,
-//     borderColor: "#D1D5DB",
-//   },
-
-//   cardHeader: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//   },
-
-//   cardTitle: {
-//     fontSize: 15,
-//     fontWeight: "600",
-//     color: "#111827",
-//   },
-
-//   cardIcon: {
-//     width: 32,
-//     height: 32,
-//     resizeMode: "contain",
-//   },
-
-//   /* ================= DIVIDER ================= */
-//   divider: {
-//     height: 0.8,
-//     backgroundColor: "#9CA3AF",
-//     marginTop: 10,
-//     marginBottom: 12,
-//     marginHorizontal: -16,
-//   },
-
-//   /* ================= ROWS ================= */
-//   rows: {
-//     gap: 8,
-//   },
-
-//   rowText: {
-//     fontSize: 13.5,
-//     lineHeight: 19,
-//     color: "#374151",
-//   },
-
-//   value: {
-//     color: "#16A34A",
-//     fontWeight: "700",
-//   },
-
-//   /* ================= BUTTONS ================= */
-//   buttonRow: {
-//     position: "absolute",
-//     bottom: 44,
-//     left: 16,
-//     right: 16,
-//     flexDirection: "row",
-//     gap: 8,
-//   },
-
-//   button: {
-//     flex: 1,
-//     height: 40,
-//     backgroundColor: "#000000",
-//     borderRadius: 20,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-
-//   buttonText: {
-//     color: "#FFFFFF",
-//     fontSize: 13,
-//     fontWeight: "600",
-//   },
-
-//   backButtonActive: {
-//     borderWidth: 2,
-//     borderColor: "#2563EB",
-//   },
-
-//   /* ================= FOOTER ================= */
-//   footer: {
-//     position: "absolute",
-//     bottom: 0,
-//     left: 0,
-//     right: 0,
-//     height: 30,
-//     backgroundColor: "#E5E7EB",
-//     borderTopWidth: 0.5,
-//     borderTopColor: "#9CA3AF",
-//   },
-// });
-
 const styles = StyleSheet.create({
   /* ================= SCREEN ================= */
   container: {
@@ -238,12 +129,7 @@ const styles = StyleSheet.create({
   },
 
   /* ================= CONTENT ================= */
-  // content: {
-  //   flexGrow: 1,
-  //   paddingTop: 16,
-  //   gap: 20,
-  //   paddingBottom: 140, // button + footer balance
-  // },
+
   content: {
     flexGrow: 1,
     paddingTop: 50,
@@ -339,7 +225,7 @@ const styles = StyleSheet.create({
 
   backButtonActive: {
     borderWidth: 2,
-    borderColor: "#2563EB",
+    borderColor: "#25eb39",
   },
 
   /* ================= FOOTER ================= */

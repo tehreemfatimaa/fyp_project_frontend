@@ -1,6 +1,5 @@
-// correct code with out blue pop up
-
-import { useRouter } from "expo-router"; //chnage
+//done
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Modal,
@@ -11,49 +10,32 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
-type RootStackParamList = {
-  InstallSolar: undefined;
-  RoofInfo: undefined;
-  AnalyzingScreen: undefined;
-};
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, "RoofInfo">;
-
+console.log("roofinfo.tsx");
 type UnitType = "sq.m" | "sq.ft" | "sq.yd";
 type PowerUnitType = "W" | "kW";
 type UnitTarget = "roof" | "panel" | "power" | null;
 type DropdownTarget = "roofType" | "orientation" | null;
 
 export default function RoofInfo() {
-  console.log("✅ ROOFINFO RENDERED");
-  const router = useRouter(); // ✅ ADDED (from code 1 logic change)
+  const router = useRouter();
 
-  const navigation = useNavigation<NavigationProp>();
-
+  // Form State (Khali rakha hai taake placeholder nazar aaye)
   const [roofAreaValue, setRoofAreaValue] = useState("");
   const [panelArea, setPanelArea] = useState("");
   const [powerOutput, setPowerOutput] = useState("");
 
-  const [roofUnit, setRoofUnit] = useState<UnitType>("sq.m");
-  const [panelUnit, setPanelUnit] = useState<UnitType>("sq.m");
-  const [powerUnit, setPowerUnit] = useState<PowerUnitType>("W");
-
-  const [isEditingRoof, setIsEditingRoof] = useState(false);
-  const [isEditingPanel, setIsEditingPanel] = useState(false);
-  const [isEditingPower, setIsEditingPower] = useState(false);
-
-  const [unitModalVisible, setUnitModalVisible] = useState(false);
-  const [unitTarget, setUnitTarget] = useState<UnitTarget>(null);
-
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [dropdownTarget, setDropdownTarget] = useState<DropdownTarget>(null);
-
+  const [roofUnit, setRoofUnit] = useState<UnitType | null>(null);
+  const [panelUnit, setPanelUnit] = useState<UnitType | null>(null);
+  const [powerUnit, setPowerUnit] = useState<PowerUnitType | null>(null);
   const [roofType, setRoofType] = useState<string>("");
   const [orientation, setOrientation] = useState<string>("");
+
+  // Modal Control State
+  const [unitModalVisible, setUnitModalVisible] = useState(false);
+  const [unitTarget, setUnitTarget] = useState<UnitTarget>(null);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [dropdownTarget, setDropdownTarget] = useState<DropdownTarget>(null);
+  const [tempSelection, setTempSelection] = useState<string>("");
 
   const unitOptions = [
     { label: "sq. m", value: "sq.m" },
@@ -78,6 +60,25 @@ export default function RoofInfo() {
     { label: "West", value: "West" },
   ];
 
+  // Open Handlers
+  const openUnitModal = (target: UnitTarget) => {
+    setUnitTarget(target);
+    const firstVal =
+      target === "power" ? powerOptions[0].value : unitOptions[0].value;
+    setTempSelection(firstVal);
+    setUnitModalVisible(true);
+  };
+
+  const openDropdownModal = (target: DropdownTarget) => {
+    setDropdownTarget(target);
+    const firstVal =
+      target === "roofType"
+        ? roofTypeOptions[0].value
+        : orientationOptions[0].value;
+    setTempSelection(firstVal);
+    setDropdownVisible(true);
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.card}>
@@ -86,6 +87,7 @@ export default function RoofInfo() {
             Estimate required roof area and orientation
           </Text>
         </View>
+        <View style={styles.separator} />
 
         <View style={styles.section}>
           {/* ROOF AREA */}
@@ -97,27 +99,19 @@ export default function RoofInfo() {
               placeholderTextColor="#9CA3AF"
               keyboardType="numeric"
               value={
-                isEditingRoof
-                  ? roofAreaValue
-                  : roofAreaValue
+                roofAreaValue
+                  ? roofUnit
                     ? `${roofAreaValue} ${roofUnit}`
-                    : ""
+                    : roofAreaValue
+                  : ""
               }
-              onFocus={() => setIsEditingRoof(true)}
-              onBlur={() => setIsEditingRoof(false)}
-              onChangeText={(text) =>
-                setRoofAreaValue(text.replace(/[^0-9.]/g, ""))
-              }
+              onChangeText={setRoofAreaValue}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() => {
-                setUnitTarget("roof");
-                setUnitModalVisible(true);
-              }}
+              onPress={() => openUnitModal("roof")}
             >
-              <Text style={styles.unitText}>{roofUnit} ▼</Text>
+              <Text style={styles.unitText}>{roofUnit || "sq.m"} ▼</Text>
             </TouchableOpacity>
           </View>
 
@@ -130,31 +124,23 @@ export default function RoofInfo() {
               placeholderTextColor="#9CA3AF"
               keyboardType="numeric"
               value={
-                isEditingPanel
-                  ? panelArea
-                  : panelArea
+                panelArea
+                  ? panelUnit
                     ? `${panelArea} ${panelUnit}`
-                    : ""
+                    : panelArea
+                  : ""
               }
-              onFocus={() => setIsEditingPanel(true)}
-              onBlur={() => setIsEditingPanel(false)}
-              onChangeText={(text) =>
-                setPanelArea(text.replace(/[^0-9.]/g, ""))
-              }
+              onChangeText={setPanelArea}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() => {
-                setUnitTarget("panel");
-                setUnitModalVisible(true);
-              }}
+              onPress={() => openUnitModal("panel")}
             >
-              <Text style={styles.unitText}>{panelUnit} ▼</Text>
+              <Text style={styles.unitText}>{panelUnit || "sq.m"} ▼</Text>
             </TouchableOpacity>
           </View>
 
-          {/* POWER OUTPUT */}
+          {/* POWER OUTPUT PER PANEL */}
           <Text style={styles.label}>Power output per panel</Text>
           <View style={styles.row}>
             <TextInput
@@ -163,27 +149,19 @@ export default function RoofInfo() {
               placeholderTextColor="#9CA3AF"
               keyboardType="numeric"
               value={
-                isEditingPower
-                  ? powerOutput
-                  : powerOutput
+                powerOutput
+                  ? powerUnit
                     ? `${powerOutput} ${powerUnit}`
-                    : ""
+                    : powerOutput
+                  : ""
               }
-              onFocus={() => setIsEditingPower(true)}
-              onBlur={() => setIsEditingPower(false)}
-              onChangeText={(text) =>
-                setPowerOutput(text.replace(/[^0-9.]/g, ""))
-              }
+              onChangeText={setPowerOutput}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() => {
-                setUnitTarget("power");
-                setUnitModalVisible(true);
-              }}
+              onPress={() => openUnitModal("power")}
             >
-              <Text style={styles.unitText}>{powerUnit} ▼</Text>
+              <Text style={styles.unitText}>{powerUnit || "W"} ▼</Text>
             </TouchableOpacity>
           </View>
 
@@ -197,14 +175,9 @@ export default function RoofInfo() {
               value={roofType}
               editable={false}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() => {
-                if (!roofType) setRoofType("Flat");
-                setDropdownTarget("roofType");
-                setDropdownVisible(true);
-              }}
+              onPress={() => openDropdownModal("roofType")}
             >
               <Text style={styles.unitText}>{roofType || "Flat"} ▼</Text>
             </TouchableOpacity>
@@ -220,59 +193,32 @@ export default function RoofInfo() {
               value={orientation}
               editable={false}
             />
-
             <TouchableOpacity
               style={styles.unitBox}
-              onPress={() => {
-                if (!orientation) setOrientation("South");
-                setDropdownTarget("orientation");
-                setDropdownVisible(true);
-              }}
+              onPress={() => openDropdownModal("orientation")}
             >
               <Text style={styles.unitText}>{orientation || "South"} ▼</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* BUTTONS */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           >
             <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
-          {/* //comment it */}
           <TouchableOpacity
             style={styles.submitButton}
             onPress={() => router.push("/analyzing-screen")}
           >
             <Text style={styles.buttonText}>Submit</Text>
           </TouchableOpacity>
-          {/* //comment it */}
-          {/* <TouchableOpacity style={styles.submitButton}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity> */}
-          {/* 2 correct */}
-          {/* <TouchableOpacity
-            style={styles.submitButton}
-            onPress={() => navigation.replace("AnalyzingScreen")}
-          >
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity> */}
-          {/* <TouchableOpacity
-            style={styles.submitButton}
-            // onPress={() => navigation.navigate("AnalyzingScreen")}
-            onPress={() => {
-              alert("Submit clicked"); // ✅ DEBUG TEST
-            }}
-          >
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity> */}
         </View>
+        <View style={styles.footerIndicator} />
       </View>
 
-      {/* UNIT + DROPDOWN MODAL (FIXED LOGIC) */}
       <Modal
         visible={unitModalVisible || dropdownVisible}
         transparent
@@ -286,542 +232,151 @@ export default function RoofInfo() {
           }}
         >
           <View style={styles.centerModal}>
-            {/* UNIT OPTIONS */}
-            {unitTarget &&
-              (unitTarget === "power" ? powerOptions : unitOptions).map(
-                (item) => {
-                  const current =
-                    unitTarget === "roof"
-                      ? roofUnit
-                      : unitTarget === "panel"
-                        ? panelUnit
-                        : powerUnit;
-
-                  return (
-                    <TouchableOpacity
-                      key={item.value}
-                      style={styles.optionRow}
-                      onPress={() => {
-                        if (unitTarget === "roof")
-                          setRoofUnit(item.value as UnitType);
-                        if (unitTarget === "panel")
-                          setPanelUnit(item.value as UnitType);
-                        if (unitTarget === "power")
-                          setPowerUnit(item.value as PowerUnitType);
-
-                        setUnitModalVisible(false);
-                        setUnitTarget(null);
-                      }}
-                    >
-                      <Text style={styles.optionText}>{item.label}</Text>
-                      <View style={styles.radioOuter}>
-                        {current === item.value && (
-                          <View style={styles.radioInner} />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                },
-              )}
-
-            {/* DROPDOWN OPTIONS */}
-            {dropdownTarget &&
-              (dropdownTarget === "roofType"
+            {(unitTarget
+              ? unitTarget === "power"
+                ? powerOptions
+                : unitOptions
+              : dropdownTarget === "roofType"
                 ? roofTypeOptions
                 : orientationOptions
-              ).map((item) => {
-                const current =
-                  dropdownTarget === "roofType"
-                    ? roofType || "Flat"
-                    : orientation || "South";
-
-                return (
-                  <TouchableOpacity
-                    key={item.value}
-                    style={styles.optionRow}
-                    onPress={() => {
-                      if (dropdownTarget === "roofType")
-                        setRoofType(item.value);
-                      if (dropdownTarget === "orientation")
-                        setOrientation(item.value);
-
-                      setDropdownVisible(false);
-                      setDropdownTarget(null);
-                    }}
-                  >
-                    <Text style={styles.optionText}>{item.label}</Text>
-                    <View style={styles.radioOuter}>
-                      {current === item.value && (
-                        <View style={styles.radioInner} />
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+            ).map((item) => (
+              <TouchableOpacity
+                key={item.value}
+                style={styles.optionRow}
+                onPress={() => {
+                  if (unitTarget === "roof")
+                    setRoofUnit(item.value as UnitType);
+                  else if (unitTarget === "panel")
+                    setPanelUnit(item.value as UnitType);
+                  else if (unitTarget === "power")
+                    setPowerOutput((prev) => prev); // ensures input stays active
+                  if (unitTarget === "power")
+                    setPowerUnit(item.value as PowerUnitType);
+                  else if (dropdownTarget === "roofType")
+                    setRoofType(item.value);
+                  else if (dropdownTarget === "orientation")
+                    setOrientation(item.value);
+                  setUnitModalVisible(false);
+                  setDropdownVisible(false);
+                }}
+              >
+                <Text style={styles.optionText}>{item.label}</Text>
+                <View style={styles.radioOuter}>
+                  {tempSelection === item.value && (
+                    <View style={styles.radioInner} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
         </TouchableOpacity>
       </Modal>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F7F8FA" },
-  content: { padding: 16 },
-  card: { backgroundColor: "#fff", borderRadius: 20, padding: 16 },
-  headerBox: {
+  container: { flex: 1, backgroundColor: "#E5E7EB" },
+  content: { padding: 12, paddingTop: 30, paddingBottom: 30 },
+  card: {
     backgroundColor: "#F3F4F6",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 14,
+    borderRadius: 35,
+    padding: 24,
+    minHeight: 720,
+    elevation: 5,
   },
-  title: { fontSize: 15, fontWeight: "600" },
-  section: { marginTop: 10 },
-  label: { fontSize: 12, marginTop: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 10 },
+  headerBox: { paddingVertical: 10, marginBottom: 8 },
+  title: { fontSize: 24, fontWeight: "800", color: "#000", lineHeight: 30 },
+  separator: { height: 1, backgroundColor: "#D1D5DB", marginBottom: 20 },
+  section: { marginTop: 0 },
+  label: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 8,
+    marginTop: 15,
+  },
+  row: { flexDirection: "row", alignItems: "center", gap: 12 },
   input: {
     flex: 1,
-    height: 42,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingHorizontal: 10,
+    height: 48,
+    backgroundColor: "#D1D5DB",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
   },
   unitBox: {
-    width: 90,
-    height: 42,
-    backgroundColor: "#111827",
-    borderRadius: 10,
+    width: 100,
+    height: 48,
+    backgroundColor: "#000",
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    elevation: 6,
   },
-  unitText: { color: "#fff" },
-  buttonRow: { flexDirection: "row", marginTop: 18, gap: 10 },
+  unitText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  buttonRow: {
+    flexDirection: "row",
+    marginTop: 40,
+    justifyContent: "flex-end",
+    gap: 15,
+  },
   backButton: {
-    flex: 1,
-    backgroundColor: "#111827",
-    padding: 12,
-    borderRadius: 10,
+    width: 110,
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    borderRadius: 25,
     alignItems: "center",
   },
   submitButton: {
-    flex: 1,
-    backgroundColor: "#111827",
-    padding: 12,
-    borderRadius: 10,
+    width: 110,
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    borderRadius: 25,
     alignItems: "center",
   },
-  buttonText: { color: "#fff" },
+  buttonText: { color: "#fff", fontWeight: "bold" },
+  footerIndicator: {
+    width: 60,
+    height: 8,
+    backgroundColor: "#22C55E",
+    borderRadius: 10,
+    alignSelf: "center",
+    marginTop: 40,
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
   centerModal: {
-    width: "70%",
+    width: "80%",
     backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 20,
+    padding: 20,
   },
   optionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 12,
-    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#EEE",
   },
-  optionText: { fontSize: 13 },
+  optionText: { fontSize: 16, fontWeight: "500" },
   radioOuter: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
+    borderColor: "#000",
     justifyContent: "center",
     alignItems: "center",
   },
   radioInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#111827",
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#000",
   },
 });
-
-//  thoray issues
-
-// import React, { useState } from "react";
-// import {
-//   Modal,
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
-
-// import { useRouter } from "expo-router";
-
-// type UnitType = "sq.m" | "sq.ft" | "sq.yd";
-// type PowerUnitType = "W" | "kW";
-// type UnitTarget = "roof" | "panel" | "power" | null;
-// type DropdownTarget = "roofType" | "orientation" | null;
-
-// export default function RoofInfo() {
-//   const router = useRouter();
-
-//   const [roofAreaValue, setRoofAreaValue] = useState("");
-//   const [panelArea, setPanelArea] = useState("");
-//   const [powerOutput, setPowerOutput] = useState("");
-
-//   const [roofUnit, setRoofUnit] = useState<UnitType>("sq.m");
-//   const [panelUnit, setPanelUnit] = useState<UnitType>("sq.m");
-//   const [powerUnit, setPowerUnit] = useState<PowerUnitType>("W");
-
-//   const [isEditingRoof, setIsEditingRoof] = useState(false);
-//   const [isEditingPanel, setIsEditingPanel] = useState(false);
-//   const [isEditingPower, setIsEditingPower] = useState(false);
-
-//   const [unitModalVisible, setUnitModalVisible] = useState(false);
-//   const [unitTarget, setUnitTarget] = useState<UnitTarget>(null);
-
-//   const [dropdownVisible, setDropdownVisible] = useState(false);
-//   const [dropdownTarget, setDropdownTarget] = useState<DropdownTarget>(null);
-
-//   const [roofType, setRoofType] = useState<string>("");
-//   const [orientation, setOrientation] = useState<string>("");
-
-//   const unitOptions = [
-//     { label: "sq. m", value: "sq.m" },
-//     { label: "sq. ft", value: "sq.ft" },
-//     { label: "sq. yd", value: "sq.yd" },
-//   ];
-
-//   const powerOptions = [
-//     { label: "W", value: "W" },
-//     { label: "kW", value: "kW" },
-//   ];
-
-//   const roofTypeOptions = [
-//     { label: "Flat", value: "Flat" },
-//     { label: "Slop", value: "Slop" },
-//   ];
-
-//   const orientationOptions = [
-//     { label: "South", value: "South" },
-//     { label: "North", value: "North" },
-//     { label: "East", value: "East" },
-//     { label: "West", value: "West" },
-//   ];
-
-//   return (
-//     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-//       <View style={styles.card}>
-//         <View style={styles.headerBox}>
-//           <Text style={styles.title}>
-//             Estimate required roof area and orientation
-//           </Text>
-//         </View>
-
-//         <View style={styles.section}>
-//           {/* ROOF AREA */}
-//           <Text style={styles.label}>Your roof area</Text>
-//           <View style={styles.row}>
-//             <TextInput
-//               style={styles.input}
-//               placeholder="eg. 40"
-//               placeholderTextColor="#9CA3AF"
-//               keyboardType="numeric"
-//               value={
-//                 isEditingRoof
-//                   ? roofAreaValue
-//                   : roofAreaValue
-//                     ? `${roofAreaValue} ${roofUnit}`
-//                     : ""
-//               }
-//               onFocus={() => setIsEditingRoof(true)}
-//               onBlur={() => setIsEditingRoof(false)}
-//               onChangeText={(text) =>
-//                 setRoofAreaValue(text.replace(/[^0-9.]/g, ""))
-//               }
-//             />
-
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() => {
-//                 setUnitTarget("roof");
-//                 setUnitModalVisible(true);
-//               }}
-//             >
-//               <Text style={styles.unitText}>{roofUnit} ▼</Text>
-//             </TouchableOpacity>
-//           </View>
-
-//           {/* PANEL AREA */}
-//           <Text style={styles.label}>Area of one panel</Text>
-//           <View style={styles.row}>
-//             <TextInput
-//               style={styles.input}
-//               placeholder="eg. 18"
-//               placeholderTextColor="#9CA3AF"
-//               keyboardType="numeric"
-//               value={
-//                 isEditingPanel
-//                   ? panelArea
-//                   : panelArea
-//                     ? `${panelArea} ${panelUnit}`
-//                     : ""
-//               }
-//               onFocus={() => setIsEditingPanel(true)}
-//               onBlur={() => setIsEditingPanel(false)}
-//               onChangeText={(text) =>
-//                 setPanelArea(text.replace(/[^0-9.]/g, ""))
-//               }
-//             />
-
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() => {
-//                 setUnitTarget("panel");
-//                 setUnitModalVisible(true);
-//               }}
-//             >
-//               <Text style={styles.unitText}>{panelUnit} ▼</Text>
-//             </TouchableOpacity>
-//           </View>
-
-//           {/* POWER OUTPUT */}
-//           <Text style={styles.label}>Power output per panel</Text>
-//           <View style={styles.row}>
-//             <TextInput
-//               style={styles.input}
-//               placeholder="eg. 100"
-//               placeholderTextColor="#9CA3AF"
-//               keyboardType="numeric"
-//               value={
-//                 isEditingPower
-//                   ? powerOutput
-//                   : powerOutput
-//                     ? `${powerOutput} ${powerUnit}`
-//                     : ""
-//               }
-//               onFocus={() => setIsEditingPower(true)}
-//               onBlur={() => setIsEditingPower(false)}
-//               onChangeText={(text) =>
-//                 setPowerOutput(text.replace(/[^0-9.]/g, ""))
-//               }
-//             />
-
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() => {
-//                 setUnitTarget("power");
-//                 setUnitModalVisible(true);
-//               }}
-//             >
-//               <Text style={styles.unitText}>{powerUnit} ▼</Text>
-//             </TouchableOpacity>
-//           </View>
-
-//           {/* ROOF TYPE */}
-//           <Text style={styles.label}>Roof type</Text>
-//           <View style={styles.row}>
-//             <TextInput style={styles.input} value={roofType} editable={false} />
-
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() => {
-//                 if (!roofType) setRoofType("Flat");
-//                 setDropdownTarget("roofType");
-//                 setDropdownVisible(true);
-//               }}
-//             >
-//               <Text style={styles.unitText}>{roofType || "Flat"} ▼</Text>
-//             </TouchableOpacity>
-//           </View>
-
-//           {/* ORIENTATION */}
-//           <Text style={styles.label}>Orientation</Text>
-//           <View style={styles.row}>
-//             <TextInput
-//               style={styles.input}
-//               value={orientation}
-//               editable={false}
-//             />
-
-//             <TouchableOpacity
-//               style={styles.unitBox}
-//               onPress={() => {
-//                 if (!orientation) setOrientation("South");
-//                 setDropdownTarget("orientation");
-//                 setDropdownVisible(true);
-//               }}
-//             >
-//               <Text style={styles.unitText}>{orientation || "South"} ▼</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-
-//         {/* BUTTONS */}
-//         <View style={styles.buttonRow}>
-//           <TouchableOpacity
-//             style={styles.backButton}
-//             onPress={() => router.back()}
-//           >
-//             <Text style={styles.buttonText}>Back</Text>
-//           </TouchableOpacity>
-
-//           <TouchableOpacity
-//             style={styles.submitButton}
-//             onPress={() => router.push("/analyzing-screen")}
-//           >
-//             <Text style={styles.buttonText}>Submit</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-
-//       {/* MODAL */}
-//       <Modal
-//         visible={unitModalVisible || dropdownVisible}
-//         transparent
-//         animationType="fade"
-//       >
-//         <TouchableOpacity
-//           style={styles.modalOverlay}
-//           onPress={() => {
-//             setUnitModalVisible(false);
-//             setDropdownVisible(false);
-//           }}
-//         >
-//           <View style={styles.centerModal}>
-//             {/* UNIT OPTIONS */}
-//             {unitTarget &&
-//               (unitTarget === "power" ? powerOptions : unitOptions).map(
-//                 (item) => (
-//                   <TouchableOpacity
-//                     key={item.value}
-//                     style={styles.optionRow}
-//                     onPress={() => {
-//                       if (unitTarget === "roof")
-//                         setRoofUnit(item.value as UnitType);
-//                       if (unitTarget === "panel")
-//                         setPanelUnit(item.value as UnitType);
-//                       if (unitTarget === "power")
-//                         setPowerUnit(item.value as PowerUnitType);
-
-//                       setUnitModalVisible(false);
-//                       setUnitTarget(null);
-//                     }}
-//                   >
-//                     <Text style={styles.optionText}>{item.label}</Text>
-//                   </TouchableOpacity>
-//                 ),
-//               )}
-
-//             {/* DROPDOWN */}
-//             {dropdownTarget &&
-//               (dropdownTarget === "roofType"
-//                 ? roofTypeOptions
-//                 : orientationOptions
-//               ).map((item) => (
-//                 <TouchableOpacity
-//                   key={item.value}
-//                   style={styles.optionRow}
-//                   onPress={() => {
-//                     if (dropdownTarget === "roofType") setRoofType(item.value);
-//                     if (dropdownTarget === "orientation")
-//                       setOrientation(item.value);
-
-//                     setDropdownVisible(false);
-//                     setDropdownTarget(null);
-//                   }}
-//                 >
-//                   <Text style={styles.optionText}>{item.label}</Text>
-//                 </TouchableOpacity>
-//               ))}
-//           </View>
-//         </TouchableOpacity>
-//       </Modal>
-//     </ScrollView>
-//   );
-// }
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#F7F8FA" },
-//   content: { padding: 16 },
-//   card: { backgroundColor: "#fff", borderRadius: 20, padding: 16 },
-//   headerBox: {
-//     backgroundColor: "#F3F4F6",
-//     padding: 12,
-//     borderRadius: 12,
-//     marginBottom: 14,
-//   },
-//   title: { fontSize: 15, fontWeight: "600" },
-//   section: { marginTop: 10 },
-//   label: { fontSize: 12, marginTop: 12 },
-//   row: { flexDirection: "row", alignItems: "center", gap: 10 },
-//   input: {
-//     flex: 1,
-//     height: 42,
-//     backgroundColor: "#F9FAFB",
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     paddingHorizontal: 10,
-//   },
-//   unitBox: {
-//     width: 90,
-//     height: 42,
-//     backgroundColor: "#111827",
-//     borderRadius: 10,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   unitText: { color: "#fff" },
-//   buttonRow: { flexDirection: "row", marginTop: 18, gap: 10 },
-//   backButton: {
-//     flex: 1,
-//     backgroundColor: "#111827",
-//     padding: 12,
-//     borderRadius: 10,
-//     alignItems: "center",
-//   },
-//   submitButton: {
-//     flex: 1,
-//     backgroundColor: "#111827",
-//     padding: 12,
-//     borderRadius: 10,
-//     alignItems: "center",
-//   },
-//   buttonText: { color: "#fff" },
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: "rgba(0,0,0,0.5)",
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   centerModal: {
-//     width: "70%",
-//     backgroundColor: "#fff",
-//     borderRadius: 14,
-//     padding: 14,
-//   },
-//   optionRow: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     paddingVertical: 12,
-//     alignItems: "center",
-//   },
-//   optionText: { fontSize: 13 },
-//   radioOuter: {
-//     width: 18,
-//     height: 18,
-//     borderRadius: 9,
-//     borderWidth: 2,
-//     justifyContent: "center",
-//     alignItems: "center",
-//   },
-//   radioInner: {
-//     width: 8,
-//     height: 8,
-//     borderRadius: 4,
-//     backgroundColor: "#111827",
-//   },
-// });
