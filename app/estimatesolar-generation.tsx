@@ -1,4 +1,4 @@
-//done
+// og
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -135,6 +135,32 @@ export default function EstimateSolarGenerationScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* ✅ UPDATED BOTTOM BAR WITH IMAGES */}
+      {/* <View style={styles.bottomBar}>
+          <BottomIcon
+          imageSource={require("../assets/images/home.png")}
+          onPress={() => router.push("/estimatesolar-generation")}
+          active={false}
+        />
+        <BottomIcon
+          imageSource={require("../assets/images/bar-chart.png")}
+          onPress={() => router.push("/stats")}
+          active={false}
+        />
+
+    
+        <BottomIcon
+          imageSource={require("../assets/images/clock.png")}
+          onPress={() => router.push("/usage")}
+          active={true}
+        />
+        <BottomIcon
+          imageSource={require("../assets/images/user.png")}
+          onPress={() => router.push("/profile")}
+          active={false}
+        />
+      </View>   */}
 
       {/* ✅ UPDATED BOTTOM BAR */}
       <View style={styles.bottomBar}>

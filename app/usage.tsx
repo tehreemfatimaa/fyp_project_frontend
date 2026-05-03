@@ -1,204 +1,225 @@
 //done
 import { useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
-  AirVent,
-  ChevronLeft,
-  Fan,
-  Lightbulb,
-  Microwave,
-  Refrigerator,
-  Tv,
-  Zap,
-} from "lucide-react-native";
-import React from "react";
-import {
+  ActivityIndicator,
   Dimensions,
   Image,
-  ImageSourcePropType,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import Svg, { Circle, G } from "react-native-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
+console.log("appliance usage");
 
 const { width } = Dimensions.get("window");
 
-const APPLIANCE_DATA = [
-  { id: "1", name: "Fans", usage: "10-11 hours", energy: "180.0", icon: Fan },
-  {
-    id: "2",
-    name: "Air Conditioner",
-    usage: "6-8 hours",
-    energy: "170.0",
-    icon: AirVent,
-  },
-  {
-    id: "3",
-    name: "Lights",
-    usage: "10-12 hours",
-    energy: "120.0",
-    icon: Lightbulb,
-  },
-  {
-    id: "4",
-    name: "Microwave",
-    usage: "15-30 min",
-    energy: "101.0",
-    icon: Microwave,
-  },
-  {
-    id: "5",
-    name: "Refrigerator",
-    usage: "12-15 hours",
-    energy: "100.0",
-    icon: Refrigerator,
-  },
-  { id: "6", name: "LED TV", usage: "2-3 hours", energy: "90.0", icon: Tv },
-];
+const APPLIANCE_IMAGES: { [key: string]: any } = {
+  fan: require("../assets/images/ceiling.png"),
+  ac: require("../assets/images/air-conditioner.png"),
+  light: require("../assets/images/lamp.png"),
+  microwave: require("../assets/images/oven.png"),
+  fridge: require("../assets/images/refrigerator.png"),
+  tv: require("../assets/images/smart-tv.png"),
+  washingmachine: require("../assets/images/washing-machine.png"),
+  iron: require("../assets/images/iron.png"),
+  default: require("../assets/images/others.png"),
+};
 
-const LEGEND = [
-  { label: "Fans", color: "#4CAF50" },
-  { label: "AC", color: "#F44336" },
-  { label: "Lights", color: "#4FC3F7" },
-  { label: "Others", color: "#DCE775" },
-];
-
-// --- Custom Components ---
-
-interface BottomIconProps {
-  imageSource: ImageSourcePropType;
-  onPress: () => void;
-  active: boolean;
-}
-
-const BottomIcon = ({ imageSource, onPress, active }: BottomIconProps) => (
+const BottomIcon = ({ imageSource, onPress, active }: any) => (
   <TouchableOpacity style={styles.bottomIconContainer} onPress={onPress}>
     {active && <View style={styles.activeIndicator} />}
     <Image
       source={imageSource}
       style={[
         styles.bottomIconImage,
-        { tintColor: active ? "#2ECC71" : "#666" },
+        { tintColor: active ? "#2ECC71" : "#888" },
       ]}
       resizeMode="contain"
     />
   </TouchableOpacity>
 );
 
-const DonutChart = () => {
-  const radius = 35;
-  const strokeWidth = 14;
-  const center = 50;
-  const circumference = 2 * Math.PI * radius;
-
-  const sections = [
-    { percent: 0.3, color: "#4CAF50" },
-    { percent: 0.25, color: "#F44336" },
-    { percent: 0.25, color: "#4FC3F7" },
-    { percent: 0.2, color: "#DCE775" },
-  ];
-
-  let currentOffset = 0;
-
-  return (
-    <View style={styles.chartWrapper}>
-      <View style={styles.svgContainer}>
-        <Svg width="160" height="160" viewBox="0 0 100 100">
-          <G rotation="-90" origin="50, 50">
-            {sections.map((section, index) => {
-              const strokeDashoffset =
-                circumference - circumference * section.percent;
-              const rotation = currentOffset * 360;
-              currentOffset += section.percent;
-              return (
-                <Circle
-                  key={index}
-                  cx={center}
-                  cy={center}
-                  r={radius}
-                  stroke={section.color}
-                  strokeWidth={strokeWidth}
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  fill="transparent"
-                  transform={`rotate(${rotation}, ${center}, ${center})`}
-                />
-              );
-            })}
-          </G>
-        </Svg>
-        <View style={styles.absoluteCenter}>
-          <Zap size={35} color="black" fill="black" />
-        </View>
-      </View>
-
-      <View style={styles.legendContainer}>
-        {LEGEND.map((item, i) => (
-          <View key={i} style={styles.legendItem}>
-            <View style={[styles.legendBox, { backgroundColor: item.color }]} />
-            <Text style={styles.legendText}>{item.label}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-};
-
 export default function UsageScreen() {
   const router = useRouter();
+  const [applianceData, setApplianceData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setTimeout(() => {
+        setApplianceData([
+          {
+            id: "1",
+            name: "Fans",
+            usage: "10-11 hours",
+            energy: "180.0",
+            imageKey: "fan",
+          },
+          {
+            id: "2",
+            name: "Air Conditioner",
+            usage: "6-8 hours",
+            energy: "170.0",
+            imageKey: "ac",
+          },
+          {
+            id: "3",
+            name: "Lights",
+            usage: "10-12 hours",
+            energy: "120.0",
+            imageKey: "light",
+          },
+          {
+            id: "4",
+            name: "Microwave",
+            usage: "15-30 min",
+            energy: "101.0",
+            imageKey: "microwave",
+          },
+          {
+            id: "5",
+            name: "Refrigerator",
+            usage: "12-15 hours",
+            energy: "100.0",
+            imageKey: "fridge",
+          },
+          {
+            id: "6",
+            name: "LED TV",
+            usage: "2-3 hours",
+            energy: "90.0",
+            imageKey: "tv",
+          },
+          {
+            id: "7",
+            name: "Washing Machine",
+            usage: "2-3 hours",
+            energy: "90.0",
+            imageKey: "washingmachine",
+          },
+          {
+            id: "8",
+            name: "Iron",
+            usage: "2-3 hours",
+            energy: "90.0",
+            imageKey: "iron",
+          },
+          {
+            id: "9",
+            name: "Other Appliances",
+            usage: "2-3 hours",
+            energy: "90.0",
+            imageKey: "default",
+          },
+        ]);
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <ChevronLeft color="black" size={28} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Usage</Text>
-      </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollPadding}
-      >
-        <View style={styles.topCard}>
-          <Text style={styles.cardHeader}>Most used appliances</Text>
-          <DonutChart />
+    <View style={{ flex: 1, backgroundColor: "#FBFBFB" }}>
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <ChevronLeft color="black" size={28} strokeWidth={2.5} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Usage</Text>
         </View>
 
-        <Text style={styles.sectionLabel}>Total Usage</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollPadding}
+        >
+          {/* CHART CARD */}
+          <View style={styles.topCard}>
+            <Text style={styles.cardHeader}>Most used appliances</Text>
 
-        {APPLIANCE_DATA.map((item) => (
-          <View key={item.id} style={styles.applianceCard}>
-            <View style={styles.row}>
-              <item.icon size={35} color="black" strokeWidth={1.5} />
-              <View style={styles.infoCol}>
-                <Text style={styles.nameText}>{item.name}</Text>
-                <Text style={styles.usageText}>Usage hours: {item.usage}</Text>
+            <View style={styles.chartContainer}>
+              {/* DONUT CHART SIDE */}
+              <View style={styles.mockChartCircle}>
+                <View style={styles.chartInner}>
+                  <Image
+                    source={require("../assets/images/bolt.png")}
+                    style={styles.boltIcon}
+                  />
+                </View>
+              </View>
+
+              {/* LEGEND SIDE */}
+              <View style={styles.legendContainer}>
+                <LegendItem color="#4CAF50" label="Fans" />
+                <LegendItem color="#F44336" label="AC" />
+                <LegendItem color="#81D4FA" label="Lights" />
+                <LegendItem color="#E6EE9C" label="Others" />
               </View>
             </View>
-            <View style={styles.energyCol}>
-              <Text style={styles.energyValueText}>{item.energy}</Text>
-              <Text style={styles.unitText}>kW</Text>
-            </View>
           </View>
-        ))}
 
-        <TouchableOpacity
-          style={styles.viewMore}
-          onPress={() => router.push("/my-appliances")}
-        >
-          <Text style={styles.viewMoreText}>View my appliances {">"}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <Text style={styles.sectionLabel}>Total Usage</Text>
 
-      {/* ✅ CORRECTED BOTTOM BAR */}
+          {loading ? (
+            <ActivityIndicator
+              size="large"
+              color="#2ECC71"
+              style={{ marginTop: 50 }}
+            />
+          ) : (
+            applianceData.map((item) => (
+              <View key={item.id} style={styles.applianceCard}>
+                <View style={styles.row}>
+                  <View style={styles.iconCircle}>
+                    <Image
+                      source={
+                        APPLIANCE_IMAGES[item.imageKey] ||
+                        APPLIANCE_IMAGES.default
+                      }
+                      style={styles.applianceIconImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <View style={styles.infoCol}>
+                    <Text style={styles.nameText}>{item.name}</Text>
+                    <Text style={styles.usageText}>
+                      Usage hours: {item.usage}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.energyCol}>
+                  <Text style={styles.energyValueText}>{item.energy}</Text>
+                  <Text style={styles.unitText}>kW</Text>
+                </View>
+              </View>
+            ))
+          )}
+
+          {/* Updated View my appliances button */}
+          <TouchableOpacity
+            style={styles.viewAppliancesBtn}
+            onPress={() => router.push("/my-appliances")} // This adds the navigation logic
+          >
+            <Text style={styles.viewAppliancesText}>
+              View my appliances {">"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+
+      {/* BOTTOM BAR */}
       <View style={styles.bottomBar}>
         <BottomIcon
           imageSource={require("../assets/images/home.png")}
@@ -221,104 +242,144 @@ export default function UsageScreen() {
           active={false}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
+// Small helper for the Legend
+const LegendItem = ({ color, label }: { color: string; label: string }) => (
+  <View style={styles.legendItem}>
+    <View style={[styles.legendColor, { backgroundColor: color }]} />
+    <Text style={styles.legendLabel}>{label}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 20,
-    marginTop: 30,
+    paddingVertical: 10,
   },
-  backButton: { marginRight: 8 },
+  backButton: { marginRight: 10 },
   headerTitle: { fontSize: 24, fontWeight: "bold", color: "#000" },
-  scrollPadding: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 120 },
+  scrollPadding: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 120 },
   topCard: {
     backgroundColor: "#FFF",
-    borderRadius: 30,
-    padding: 16,
+    borderRadius: 24,
+    padding: 24,
     marginBottom: 25,
-    elevation: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
   },
   cardHeader: {
-    fontSize: 20,
-    color: "#777",
+    fontSize: 22,
+    color: "#4F4F4F",
     fontWeight: "600",
     marginBottom: 20,
   },
-  chartWrapper: {
+  chartContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  svgContainer: {
+  mockChartCircle: {
     width: 160,
     height: 160,
-    justifyContent: "center",
+    borderRadius: 80,
+    borderWidth: 20,
+    borderColor: "#4CAF50",
+    borderTopColor: "#E6EE9C",
+    borderRightColor: "#81D4FA",
+    borderLeftColor: "#F44336",
     alignItems: "center",
+    justifyContent: "center",
   },
-  absoluteCenter: { position: "absolute" },
-  legendContainer: { flex: 1, marginLeft: 25 },
-  legendItem: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
-  legendBox: { width: 18, height: 18, borderRadius: 2, marginRight: 10 },
-  legendText: { color: "#666", fontSize: 16, fontWeight: "500" },
+  chartInner: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boltIcon: { width: 30, height: 30, tintColor: "#000" },
+  legendContainer: { flex: 1, marginLeft: 25, gap: 12 },
+  legendItem: { flexDirection: "row", alignItems: "center" },
+  legendColor: { width: 18, height: 18, borderRadius: 2, marginRight: 10 },
+  legendLabel: { fontSize: 16, color: "#4F4F4F", fontWeight: "500" },
   sectionLabel: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#BBB",
+    fontWeight: "700",
+    color: "#8E8E93",
     marginBottom: 15,
+    marginLeft: 5,
   },
   applianceCard: {
     backgroundColor: "#FFF",
-    borderRadius: 30,
+    borderRadius: 20,
     padding: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 18,
-    elevation: 4,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
   },
   row: { flexDirection: "row", alignItems: "center" },
-  infoCol: { marginLeft: 15 },
-  nameText: { fontSize: 18, fontWeight: "bold", color: "#000" },
-  usageText: { fontSize: 13, color: "#AAA", marginTop: 2 },
+  iconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F8F8F8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  applianceIconImage: { width: 28, height: 28 },
+  infoCol: { marginLeft: 12 },
+  nameText: { fontSize: 16, fontWeight: "700", color: "#333" },
+  usageText: { fontSize: 12, color: "#BCBCBC", marginTop: 2 },
   energyCol: { flexDirection: "row", alignItems: "baseline" },
-  energyValueText: { fontSize: 20, fontWeight: "bold", color: "#000" },
-  unitText: { fontSize: 12, color: "#666", marginLeft: 2, fontWeight: "600" },
-  viewMore: { alignSelf: "flex-end", marginTop: 5, marginBottom: 20 },
-  viewMoreText: { color: "#4CAF50", fontWeight: "bold", fontSize: 15 },
-
+  energyValueText: { fontSize: 18, fontWeight: "bold", color: "#000" },
+  unitText: { fontSize: 12, color: "#8E8E93", marginLeft: 2 },
+  viewAppliancesBtn: { alignSelf: "flex-end", marginTop: 10, marginRight: 5 },
+  viewAppliancesText: { color: "#2ECC71", fontWeight: "600", fontSize: 14 },
   bottomBar: {
     position: "absolute",
     bottom: 0,
     width: "100%",
     height: 85,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 45,
-    borderTopRightRadius: 45,
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingBottom: 20,
+    paddingBottom: 15,
     elevation: 20,
-    borderWidth: 1,
-    borderColor: "#F5F5F5",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   bottomIconContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 65,
+    width: 60,
     height: "100%",
   },
-  bottomIconImage: { width: 30, height: 30 },
+  bottomIconImage: { width: 24, height: 24 },
   activeIndicator: {
     position: "absolute",
     top: 0,
-    width: 35,
+    width: 30,
     height: 4,
     backgroundColor: "#2ECC71",
     borderRadius: 2,

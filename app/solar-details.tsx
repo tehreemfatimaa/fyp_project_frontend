@@ -1,19 +1,20 @@
-//done
+//og
+
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    Image,
-    ImageSourcePropType,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ImageSourcePropType,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // --- BottomIcon Component ---
@@ -286,30 +287,66 @@ const styles = StyleSheet.create({
   },
   borderBottom: { borderBottomWidth: 1, borderBottomColor: "#EEE" },
   optionText: { fontSize: 18, fontWeight: "500" },
+  // bottomBar: {
+  //   position: "absolute",
+  //   bottom: 0,
+  //   width: "100%",
+  //   height: 75,
+  //   backgroundColor: "#fff",
+  //   flexDirection: "row",
+  //   justifyContent: "space-around",
+  //   alignItems: "center",
+  //   borderTopLeftRadius: 35,
+  //   borderTopRightRadius: 35,
+  //   elevation: 20,
+  // },
+  // bottomIconContainer: {
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   width: 60,
+  //   height:"100%",
+  // },
+  // bottomIconImage: { width: 26, height: 26 },
+  // activeIndicator: {
+  //   position: "absolute",
+  //   top: 0,
+  //   width: 30,
+  //   height: 4,
+  //   backgroundColor: "#4caf50",
+  //   borderRadius: 2,
+  // },
+
   bottomBar: {
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: 75,
+    height: 70,
     backgroundColor: "#fff",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    elevation: 20,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    elevation: 10,
   },
   bottomIconContainer: {
     alignItems: "center",
     justifyContent: "center",
+    height: "100%",
     width: 60,
   },
-  bottomIconImage: { width: 26, height: 26 },
+  bottomIconImage: {
+    width: 26,
+    height: 26,
+  },
   activeIndicator: {
     position: "absolute",
     top: 0,
     width: 35,
     height: 3,
-    backgroundColor: "#4caf50",
+    backgroundColor: "#4caf50", // Correct Green
+    borderRadius: 2,
   },
 });

@@ -1,4 +1,3 @@
-//done
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -19,16 +18,75 @@ type Appliance = {
   power?: string;
 };
 
+const WATTAGE_DATA: Record<string, string> = {
+  "A/C": "75",
+  "D/C": "50",
+  Inverter: "45",
+  "5W": "5",
+  "7W": "7",
+  "12W": "12",
+  "15W": "15",
+  "18W": "18",
+  '32"': "40",
+  '42"': "60",
+  '55"': "80",
+  '65"': "120",
+  "A/C (Fridge)": "250",
+  "Inverter (Fridge)": "150",
+  "A/C (WM)": "500",
+  "Inverter (WM)": "300",
+  "Plastic body": "1000",
+  "Metal body": "1200",
+  "1.0 ton": "1200",
+  "1.5 ton": "1800",
+  "2.0 ton": "2400",
+  "1 ton": "1000",
+  "1.5 ton (Inv)": "1400",
+  Standard: "1200",
+};
+
 const initialAppliances: Appliance[] = [
-  { label: "Select fan type", options: ["A/C", "D/C", "Inverter"] },
-  { label: "Select LED bulb type", options: ["5W", "7W", "12W", "15W", "18W"] },
-  { label: "Select LED TV type", options: ['32"', '42"', '55"', '65"'] },
-  { label: "Select Refrigerator type", options: ["A/C", "Inverter"] },
-  { label: "Select Washing machine type", options: ["A/C", "Inverter"] },
-  { label: "Select iron type", options: ["Plastic body", "Metal body"] },
-  { label: "Select Split AC type", options: ["1.0 ton", "1.5 ton", "2.0 ton"] },
-  { label: "Select inverter AC type", options: ["1 ton", "1.5 ton"] },
-  { label: "Select microwave type", options: ["Standard"] },
+  {
+    label: "Select fan type",
+    options: ["A/C", "D/C", "Inverter"],
+    power: "75",
+  },
+  {
+    label: "Select LED bulb type",
+    options: ["5W", "7W", "12W", "15W", "18W"],
+    power: "5",
+  },
+  {
+    label: "Select LED TV type",
+    options: ['32"', '42"', '55"', '65"'],
+    power: "40",
+  },
+  {
+    label: "Select Refrigerator type",
+    options: ["A/C", "Inverter"],
+    power: "250",
+  },
+  {
+    label: "Select Washing machine type",
+    options: ["A/C", "Inverter"],
+    power: "500",
+  },
+  {
+    label: "Select iron type",
+    options: ["Plastic body", "Metal body"],
+    power: "1000",
+  },
+  {
+    label: "Select Split AC type",
+    options: ["1.0 ton", "1.5 ton", "2.0 ton"],
+    power: "1200",
+  },
+  {
+    label: "Select inverter AC type",
+    options: ["1 ton", "1.5 ton"],
+    power: "1000",
+  },
+  { label: "Select microwave type", options: ["Standard"], power: "1200" },
 ];
 
 const USAGE_OPTIONS = [
@@ -43,9 +101,13 @@ export default function ApplianceUsagePattern() {
   const [applianceList, setApplianceList] =
     useState<Appliance[]>(initialAppliances);
 
+  // Initializing selected with empty strings so placeholder stays grey
   const [selected, setSelected] = useState<(string | null)[]>(
-    initialAppliances.map(() => null),
+    initialAppliances.map((item) =>
+      item.label === "Select microwave type" ? "Standard" : "",
+    ),
   );
+
   const [usage, setUsage] = useState<(string | null)[]>(
     initialAppliances.map(() => null),
   );
@@ -81,6 +143,22 @@ export default function ApplianceUsagePattern() {
         const newSelected = [...selected];
         newSelected[activeIndex] = value;
         setSelected(newSelected);
+
+        const newList = [...applianceList];
+        let lookupKey = value;
+
+        if (newList[activeIndex].label.includes("Refrigerator"))
+          lookupKey = value === "A/C" ? "A/C (Fridge)" : "Inverter (Fridge)";
+        if (newList[activeIndex].label.includes("Washing machine"))
+          lookupKey = value === "A/C" ? "A/C (WM)" : "Inverter (WM)";
+        if (
+          newList[activeIndex].label.includes("inverter AC") &&
+          value === "1.5 ton"
+        )
+          lookupKey = "1.5 ton (Inv)";
+
+        newList[activeIndex].power = WATTAGE_DATA[lookupKey] || "0";
+        setApplianceList(newList);
       } else {
         const newUsageArr = [...usage];
         newUsageArr[activeIndex] = value;
@@ -109,6 +187,7 @@ export default function ApplianceUsagePattern() {
       setSelected([...selected, "Custom"]);
       setUsage([...usage, newUsage || USAGE_OPTIONS[0]]);
       setQuantity([...quantity, newQty]);
+
       setNewName("");
       setNewPower("");
       setNewQty(0);
@@ -117,7 +196,14 @@ export default function ApplianceUsagePattern() {
     }
   };
 
-  // Helper for Black Radio Icon
+  const handleCloseAdd = () => {
+    setNewName("");
+    setNewPower("");
+    setNewQty(0);
+    setNewUsage(null);
+    setAddModalVisible(false);
+  };
+
   const renderRadioIcon = (isSelected: boolean) => (
     <View
       style={[styles.radioCircle, isSelected && styles.radioCircleSelected]}
@@ -165,14 +251,18 @@ export default function ApplianceUsagePattern() {
                       <Text
                         style={[
                           styles.dropdownText,
-                          currentSelected ? styles.textBlack : styles.textGrey,
+                          currentSelected !== ""
+                            ? styles.textBlack
+                            : styles.textGrey,
                         ]}
                       >
                         {item.isCustom
                           ? item.label
                           : isMicrowave
                             ? "Standard"
-                            : currentSelected || item.options[0]}
+                            : currentSelected !== ""
+                              ? currentSelected
+                              : item.options[0]}
                       </Text>
                       {!isMicrowave && !item.isCustom && (
                         <Text style={styles.arrow}>▼</Text>
@@ -201,7 +291,16 @@ export default function ApplianceUsagePattern() {
                   <View style={styles.right}>
                     <Text style={styles.label}>Power rating(Watts)</Text>
                     <View style={styles.powerInput}>
-                      <Text style={styles.darkText}>{item.power || "0"}</Text>
+                      <Text
+                        style={[
+                          currentSelected !== ""
+                            ? styles.textBlack
+                            : styles.textGrey,
+                          { fontWeight: "bold" },
+                        ]}
+                      >
+                        {currentSelected !== "" ? item.power : "0"}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -252,6 +351,7 @@ export default function ApplianceUsagePattern() {
         </ScrollView>
       </View>
 
+      {/* Add Appliance Modal */}
       <Modal visible={addModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.addPopup}>
@@ -318,13 +418,34 @@ export default function ApplianceUsagePattern() {
                 />
               </View>
             </View>
-            <TouchableOpacity style={styles.doneBtn} onPress={handleDoneAdd}>
-              <Text style={styles.btnTextWhite}>Done</Text>
-            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.row,
+                { marginTop: 20, justifyContent: "space-between" },
+              ]}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.doneBtn,
+                  { backgroundColor: "#000", alignSelf: "auto" },
+                ]}
+                onPress={handleCloseAdd}
+              >
+                <Text style={styles.btnTextWhite}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.doneBtn, { alignSelf: "auto" }]}
+                onPress={handleDoneAdd}
+              >
+                <Text style={styles.btnTextWhite}>Done</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
 
+      {/* Dropdown Modal */}
       <Modal
         visible={modalVisible || usagePickerVisible}
         transparent
@@ -348,17 +469,19 @@ export default function ApplianceUsagePattern() {
               }
               renderItem={({ item, index: itemIdx }) => {
                 let isSelected = false;
-                if (usagePickerVisible)
+                if (usagePickerVisible) {
                   isSelected =
                     newUsage === item || (!newUsage && itemIdx === 0);
-                else if (modalType === "options" && activeIndex !== null)
+                } else if (modalType === "options" && activeIndex !== null) {
+                  // Radio remains filled for index 0 if nothing selected
                   isSelected =
                     selected[activeIndex] === item ||
-                    (!selected[activeIndex] && itemIdx === 0);
-                else if (modalType === "usage" && activeIndex !== null)
+                    (selected[activeIndex] === "" && itemIdx === 0);
+                } else if (modalType === "usage" && activeIndex !== null) {
                   isSelected =
                     usage[activeIndex] === item ||
                     (!usage[activeIndex] && itemIdx === 0);
+                }
 
                 return (
                   <TouchableOpacity
@@ -378,7 +501,6 @@ export default function ApplianceUsagePattern() {
                     >
                       {item}
                     </Text>
-                    {/* Radio moved to Right Side */}
                     {renderRadioIcon(isSelected)}
                   </TouchableOpacity>
                 );

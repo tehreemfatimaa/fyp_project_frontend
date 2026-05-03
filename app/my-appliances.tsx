@@ -1,17 +1,17 @@
-//done
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    FlatList,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type Appliance = {
@@ -20,47 +20,93 @@ type Appliance = {
   isCustom?: boolean;
   power?: string;
 };
-console.log("edit aapliance if u want");
+
+const WATTAGE_DATA: Record<string, string> = {
+  "A/C": "75",
+  "D/C": "50",
+  Inverter: "45",
+  "5W": "5",
+  "7W": "7",
+  "12W": "12",
+  "15W": "15",
+  "18W": "18",
+  '32"': "40",
+  '42"': "60",
+  '55"': "80",
+  '65"': "120",
+  "A/C (Fridge)": "250",
+  "Inverter (Fridge)": "150",
+  "A/C (WM)": "500",
+  "Inverter (WM)": "300",
+  "Plastic body": "1000",
+  "Metal body": "1200",
+  "1.0 ton": "1200",
+  "1.5 ton": "1800",
+  "2.0 ton": "2400",
+  "1 ton": "1000",
+  "1.5 ton (Inv)": "1400",
+  Standard: "1200",
+};
+
 const initialAppliances: Appliance[] = [
   {
     label: "Select fan type",
     options: ["A/C", "D/C", "Inverter"],
-    power: "50",
+    power: "75",
   },
   {
     label: "Select LED bulb type",
     options: ["5W", "7W", "12W", "15W", "18W"],
-    power: "50",
+    power: "5",
   },
   {
     label: "Select LED TV type",
     options: ['32"', '42"', '55"', '65"'],
-    power: "100",
+    power: "40",
   },
   {
     label: "Select Refrigerator type",
     options: ["A/C", "Inverter"],
-    power: "110",
+    power: "250",
   },
   {
     label: "Select Washing machine type",
     options: ["A/C", "Inverter"],
-    power: "150",
+    power: "500",
   },
   {
     label: "Select iron type",
     options: ["Plastic body", "Metal body"],
-    power: "18",
+    power: "1000",
   },
   {
     label: "Select Split AC type",
     options: ["1.0 ton", "1.5 ton", "2.0 ton"],
-    power: "150",
+    power: "1200",
   },
-  { label: "Select microwave type", options: ["Standard"], power: "100" },
+  { label: "Select microwave type", options: ["Standard"], power: "1200" },
 ];
 
-const USAGE_OPTIONS = ["Morning", "Afternoon", "Evening", "Night"];
+const USAGE_OPTIONS = [
+  "Morning(6am-12pm)",
+  "Afternoon(12pm-4pm)",
+  "Evening(4pm-8pm)",
+  "Night(8pm-6am)",
+];
+
+const BottomIcon = ({ imageSource, onPress, active }: any) => (
+  <TouchableOpacity style={styles.bottomIconContainer} onPress={onPress}>
+    {active && <View style={styles.activeIndicator} />}
+    <Image
+      source={imageSource}
+      style={[
+        styles.bottomIconImage,
+        { tintColor: active ? "#2ECC71" : "#888" },
+      ]}
+      resizeMode="contain"
+    />
+  </TouchableOpacity>
+);
 
 export default function ApplianceUsagePattern() {
   const router = useRouter();
@@ -70,15 +116,13 @@ export default function ApplianceUsagePattern() {
     initialAppliances.map((a) => a.options[0]),
   );
   const [usage, setUsage] = useState<(string | null)[]>(
-    initialAppliances.map(() => "Morning"),
+    initialAppliances.map(() => "Morning(6am-12pm)"),
   );
   const [quantity, setQuantity] = useState<number[]>(
     initialAppliances.map((_, i) => (i === 0 ? 6 : i === 1 ? 10 : 1)),
   );
 
-  // State to track which item is being edited
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<"options" | "usage">("options");
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -95,7 +139,7 @@ export default function ApplianceUsagePattern() {
   };
 
   const openModal = (index: number, type: "options" | "usage") => {
-    if (editingIndex !== index) return; // Lock if not editing
+    if (editingIndex !== index) return;
     if (
       type === "options" &&
       applianceList[index].label === "Select microwave type"
@@ -112,6 +156,16 @@ export default function ApplianceUsagePattern() {
         const newSelected = [...selected];
         newSelected[activeIndex] = value;
         setSelected(newSelected);
+
+        const newList = [...applianceList];
+        let lookupKey = value;
+        if (newList[activeIndex].label.includes("Refrigerator"))
+          lookupKey = value === "A/C" ? "A/C (Fridge)" : "Inverter (Fridge)";
+        if (newList[activeIndex].label.includes("Washing machine"))
+          lookupKey = value === "A/C" ? "A/C (WM)" : "Inverter (WM)";
+
+        newList[activeIndex].power = WATTAGE_DATA[lookupKey] || "0";
+        setApplianceList(newList);
       } else {
         const newUsageArr = [...usage];
         newUsageArr[activeIndex] = value;
@@ -131,8 +185,19 @@ export default function ApplianceUsagePattern() {
 
   const handleDelete = (index: number) => {
     const newList = [...applianceList];
+    const newSelected = [...selected];
+    const newUsageArr = [...usage];
+    const newQtyArr = [...quantity];
+
     newList.splice(index, 1);
+    newSelected.splice(index, 1);
+    newUsageArr.splice(index, 1);
+    newQtyArr.splice(index, 1);
+
     setApplianceList(newList);
+    setSelected(newSelected);
+    setUsage(newUsageArr);
+    setQuantity(newQtyArr);
     setEditingIndex(null);
   };
 
@@ -146,7 +211,7 @@ export default function ApplianceUsagePattern() {
       };
       setApplianceList([...applianceList, newAppliance]);
       setSelected([...selected, newName]);
-      setUsage([...usage, newUsage || "Morning"]);
+      setUsage([...usage, newUsage || "Morning(6am-12pm)"]);
       setQuantity([...quantity, newQty]);
       closeAddModal();
     }
@@ -167,8 +232,8 @@ export default function ApplianceUsagePattern() {
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Appliances</Text>
-        <View style={styles.divider} />
       </View>
+      <View style={styles.headerDivider} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -198,7 +263,6 @@ export default function ApplianceUsagePattern() {
                 </View>
 
                 <View style={styles.center}>
-                  {/* edit here */}
                   <Text style={styles.label}></Text>
                   <View
                     style={[styles.qtyContainer, !isEditing && styles.lockedBg]}
@@ -218,7 +282,7 @@ export default function ApplianceUsagePattern() {
                 </View>
 
                 <View style={styles.right}>
-                  <Text style={styles.label}>Power ratting (Watt)</Text>
+                  <Text style={styles.label}>Power rating (Watt)</Text>
                   <View
                     style={[styles.powerInput, !isEditing && styles.lockedBg]}
                   >
@@ -246,6 +310,7 @@ export default function ApplianceUsagePattern() {
                     />
                   </TouchableOpacity>
                 </View>
+                {/* FIXED: Changed from <div> to <View> */}
                 <View style={styles.actionIcons}>
                   <TouchableOpacity onPress={() => toggleEdit(index)}>
                     <MaterialCommunityIcons
@@ -277,13 +342,12 @@ export default function ApplianceUsagePattern() {
 
         <TouchableOpacity
           style={styles.saveMainBtn}
-          onPress={() => router.push("/profile")}
+          onPress={() => router.push("/estimatesolar-generation")}
         >
           <Text style={styles.saveMainText}>Save</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Add Appliance Modal */}
       <Modal visible={addModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.addPopup}>
@@ -291,7 +355,6 @@ export default function ApplianceUsagePattern() {
               <Text style={{ color: "#28a745" }}>+</Text> Add Appliance
             </Text>
             <View style={styles.popupDivider} />
-
             <View style={styles.row}>
               <View style={{ flex: 1.5 }}>
                 <Text style={styles.label}>Appliance name</Text>
@@ -317,7 +380,6 @@ export default function ApplianceUsagePattern() {
                 </View>
               </View>
             </View>
-
             <View style={[styles.row, { marginTop: 15 }]}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.label}>usage hours</Text>
@@ -337,7 +399,7 @@ export default function ApplianceUsagePattern() {
                 </TouchableOpacity>
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.label}>power ratting (Watt)</Text>
+                <Text style={styles.label}>power rating (Watt)</Text>
                 <TextInput
                   style={styles.popupInput}
                   keyboardType="numeric"
@@ -347,7 +409,6 @@ export default function ApplianceUsagePattern() {
                 />
               </View>
             </View>
-
             <View style={styles.popupFooterButtons}>
               <TouchableOpacity onPress={closeAddModal} style={styles.blackBtn}>
                 <Text style={styles.whiteBtnText}>Close</Text>
@@ -360,7 +421,6 @@ export default function ApplianceUsagePattern() {
         </View>
       </Modal>
 
-      {/* Radio Button Selection Modal */}
       <Modal
         visible={modalVisible || usagePickerVisible}
         transparent
@@ -420,10 +480,26 @@ export default function ApplianceUsagePattern() {
       </Modal>
 
       <View style={styles.bottomBar}>
-        <Ionicons name="home-outline" size={24} color="black" />
-        <Ionicons name="stats-chart-outline" size={24} color="black" />
-        <Ionicons name="pie-chart-outline" size={24} color="black" />
-        <Ionicons name="person-circle-outline" size={28} color="#28a745" />
+        <BottomIcon
+          imageSource={require("../assets/images/home.png")}
+          onPress={() => router.push("/estimatesolar-generation")}
+          active={false}
+        />
+        <BottomIcon
+          imageSource={require("../assets/images/bar-chart.png")}
+          onPress={() => router.push("/stats")}
+          active={false}
+        />
+        <BottomIcon
+          imageSource={require("../assets/images/clock.png")}
+          onPress={() => router.push("/usage")}
+          active={false}
+        />
+        <BottomIcon
+          imageSource={require("../assets/images/user.png")}
+          onPress={() => router.push("/profile")}
+          active={true}
+        />
       </View>
     </SafeAreaView>
   );
@@ -432,15 +508,15 @@ export default function ApplianceUsagePattern() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#fff" },
   header: {
-    backgroundColor: "#f2f2f2",
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    marginTop: 20,
+    paddingTop: 40,
   },
   headerTitle: { fontSize: 20, fontWeight: "bold", marginLeft: 15 },
+  headerDivider: { height: 1, backgroundColor: "#eee", width: "100%" },
   section: { paddingHorizontal: 20, marginBottom: 10, paddingVertical: 5 },
-  editingSection: { backgroundColor: "#ffffff", borderRadius: 10 },
+  editingSection: { backgroundColor: "#f9f9f9", borderRadius: 10 },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -459,7 +535,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "bold",
     color: "#7a7a7a",
-    // color: "#696767",
     marginBottom: 4,
   },
   dropdown: {
@@ -506,7 +581,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   divider: { height: 1, backgroundColor: "#ddd", marginTop: 15 },
-  sectionDivider: { height: 1, backgroundColor: "#b9b7b7", marginTop: 15 },
   addBtn: {
     backgroundColor: "#28a745",
     width: 80,
@@ -584,9 +658,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    height: 60,
+    height: 70,
     borderTopWidth: 1,
     borderTopColor: "#eee",
     backgroundColor: "#fff",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  bottomIconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60,
+    height: "100%",
+  },
+  bottomIconImage: { width: 24, height: 24 },
+  activeIndicator: {
+    position: "absolute",
+    top: 0,
+    width: 30,
+    height: 4,
+    backgroundColor: "#2ECC71",
+    borderRadius: 2,
   },
 });
