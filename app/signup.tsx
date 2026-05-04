@@ -54,7 +54,7 @@ export default function SignUpScreen() {
       {
         text: "OK",
 
-        onPress: () => router.push("/inputfor_pre"),
+        onPress: () => router.replace("/login"),
       },
     ]);
   };
@@ -122,7 +122,7 @@ export default function SignUpScreen() {
             Already have an account?{" "}
             <Text
               style={[styles.signInLink, isPressed && styles.signInLinkActive]}
-              onPress={() => router.push("/")}
+              onPress={() => router.replace("/login")}
             >
               Log in
             </Text>

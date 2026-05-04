@@ -19,7 +19,7 @@ const { width } = Dimensions.get("window");
 
 const APPLIANCE_IMAGES: { [key: string]: any } = {
   fan: require("../assets/images/ceiling.png"),
-  ac: require("../assets/images/air-conditioner.png"),
+  // ac: require("../assets/images/air-conditioner.png"),r
   light: require("../assets/images/lamp.png"),
   microwave: require("../assets/images/oven.png"),
   fridge: require("../assets/images/refrigerator.png"),

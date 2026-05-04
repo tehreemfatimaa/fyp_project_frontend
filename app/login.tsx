@@ -43,7 +43,7 @@ export default function HomeScreen() {
     }
 
     // If everything is fine, move to the next screen
-    router.push("/welcome");
+    router.replace("/welcome");
   };
 
   return (
